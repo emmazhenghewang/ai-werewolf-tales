@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Player, PlayerRole } from '@/types/game';
@@ -26,7 +27,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 
 const GameSetup = () => {
-  const { gameState, addPlayer, removePlayer, setPlayers, currentPlayer, sendMessage } = useGame();
+  const { gameState, addPlayer, removePlayer, setPlayers, currentPlayer, sendMessage, startGame: contextStartGame } = useGame();
   const [playerName, setPlayerName] = useState('');
   const [isAI, setIsAI] = useState(false);
   const [selectedRole, setSelectedRole] = useState<PlayerRole>('villager');
@@ -99,81 +100,86 @@ const GameSetup = () => {
   const startGame = () => {
     // Set up AI players if none exist
     if (gameState.players.length === 0) {
-      // Add moderator
-      addPlayer("AI_Moderator", true);
+      autoFillWithAIPlayers();
+      
+      // Start game after a short delay to allow for player setup
       setTimeout(() => {
-        const moderator = gameState.players.find(p => p.name === "AI_Moderator");
-        if (moderator) handleSetRole(moderator.id, 'moderator');
-      }, 10);
-
-      // Add villagers
-      ["AI_John", "AI_Mary", "AI_Sarah"].forEach(name => {
-        addPlayer(name, true);
-        setTimeout(() => {
-          const player = gameState.players.find(p => p.name === name);
-          if (player) handleSetRole(player.id, 'villager');
-        }, 10);
-      });
-
-      // Add wolves
-      ["AI_Wolf1", "AI_Wolf2", "AI_Wolf3"].forEach(name => {
-        addPlayer(name, true);
-        setTimeout(() => {
-          const player = gameState.players.find(p => p.name === name);
-          if (player) handleSetRole(player.id, 'wolf');
-        }, 10);
-      });
-
-      // Add special roles
-      const specialRoles: [string, PlayerRole][] = [
-        ["AI_Seer", 'seer'],
-        ["AI_Witch", 'witch'],
-        ["AI_Hunter", 'hunter']
-      ];
-
-      specialRoles.forEach(([name, role]) => {
-        addPlayer(name, true);
-        setTimeout(() => {
-          const player = gameState.players.find(p => p.name === name);
-          if (player) handleSetRole(player.id, role);
-        }, 10);
-      });
-
-      // Start simulation after a short delay to allow for player setup
-      setTimeout(() => {
-        simulateGameStart();
+        contextStartGame();
       }, 500);
     } else {
-      simulateGameStart();
+      contextStartGame();
     }
   };
 
   const simulateGameStart = () => {
-    // Trigger game start
-    if (hasRequiredRoles) {
-      // Start the game through context
-      const { startGame: contextStartGame } = useGame();
-      contextStartGame();
-
-      // Schedule night phase chat for wolves
-      setTimeout(() => {
-        const wolves = gameState.players.filter(p => p.role === 'wolf');
-        wolves.forEach((wolf, index) => {
-          setTimeout(() => {
-            sendMessage(`Let's target ${gameState.players.find(p => p.role === 'villager')?.name}!`, 'wolf');
-          }, index * 1000);
-        });
-      }, 2000);
-
-      // Schedule day phase discussions
-      setTimeout(() => {
-        const alivePlayers = gameState.players.filter(p => p.status === 'alive' && p.role !== 'moderator');
-        alivePlayers.forEach((player, index) => {
-          setTimeout(() => {
-            sendMessage(`I think we should investigate ${gameState.players.find(p => p.role === 'wolf')?.name}`, 'village');
-          }, index * 1000);
-        });
-      }, 5000);
+    contextStartGame();
+  };
+  
+  const autoFillWithAIPlayers = () => {
+    const aiNames = [
+      "AI_Olivia", "AI_Noah", "AI_Emma", "AI_Liam", 
+      "AI_Ava", "AI_William", "AI_Sophia", "AI_James", 
+      "AI_Isabella", "AI_Benjamin"
+    ];
+    
+    // Define required roles
+    const requiredRoles: Record<PlayerRole, number> = {
+      villager: 3,
+      wolf: 3,
+      seer: 1,
+      witch: 1,
+      hunter: 1,
+      moderator: 1
+    };
+    
+    // Calculate missing roles
+    const missingRoles: PlayerRole[] = [];
+    
+    Object.entries(requiredRoles).forEach(([role, required]) => {
+      const current = roleCounts[role as PlayerRole];
+      const needed = Math.max(0, required - current);
+      
+      for (let i = 0; i < needed; i++) {
+        missingRoles.push(role as PlayerRole);
+      }
+    });
+    
+    // Shuffle missing roles to randomize assignment
+    const shuffledRoles = [...missingRoles].sort(() => Math.random() - 0.5);
+    
+    // Add AI players for all missing roles at once
+    if (shuffledRoles.length > 0) {
+      // First create all players
+      const newPlayers: { name: string, role: PlayerRole }[] = [];
+      
+      shuffledRoles.forEach((role, index) => {
+        const aiName = aiNames[index % aiNames.length];
+        newPlayers.push({ name: aiName, role });
+      });
+      
+      // Then add all players with their roles in a batch
+      newPlayers.forEach(({ name, role }) => {
+        // Add player
+        addPlayer(name, true);
+        
+        // We need to use setTimeout to ensure the player is added before setting role
+        setTimeout(() => {
+          const newPlayer = gameState.players.find(p => p.name === name);
+          if (newPlayer) {
+            handleSetRole(newPlayer.id, role);
+          }
+        }, 10);
+      });
+      
+      toast({
+        title: "AI Players Added",
+        description: `Added ${newPlayers.length} AI players with the required roles`,
+      });
+    } else {
+      toast({
+        title: "All Roles Filled",
+        description: "All required roles are already filled",
+      });
     }
   };
   
@@ -349,46 +355,7 @@ const GameSetup = () => {
       <div className="mt-6">
         <Button 
           className="accent-button w-full"
-          onClick={() => {
-            const aiNames = [
-              "AI_Olivia", "AI_Noah", "AI_Emma", "AI_Liam", 
-              "AI_Ava", "AI_William", "AI_Sophia", "AI_James", 
-              "AI_Isabella", "AI_Benjamin"
-            ];
-            
-            const missingRoles: PlayerRole[] = [];
-            
-            if (roleCounts.villager < 3) {
-              for (let i = 0; i < 3 - roleCounts.villager; i++) {
-                missingRoles.push('villager');
-              }
-            }
-            
-            if (roleCounts.wolf < 3) {
-              for (let i = 0; i < 3 - roleCounts.wolf; i++) {
-                missingRoles.push('wolf');
-              }
-            }
-            
-            if (roleCounts.seer < 1) missingRoles.push('seer');
-            if (roleCounts.witch < 1) missingRoles.push('witch');
-            if (roleCounts.hunter < 1) missingRoles.push('hunter');
-            if (roleCounts.moderator < 1) missingRoles.push('moderator');
-            
-            let aiNameIndex = 0;
-            missingRoles.forEach(role => {
-              const name = aiNames[aiNameIndex % aiNames.length];
-              addPlayer(name, true);
-              aiNameIndex++;
-              
-              setTimeout(() => {
-                const newPlayer = gameState.players.find(p => p.name === name);
-                if (newPlayer) {
-                  handleSetRole(newPlayer.id, role);
-                }
-              }, 10);
-            });
-          }}
+          onClick={autoFillWithAIPlayers}
         >
           <UserPlus className="h-4 w-4 mr-2" />
           Auto-fill with AI Players
