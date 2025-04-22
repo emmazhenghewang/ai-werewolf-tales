@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useGame } from '@/context/GameContext';
-import { ActionType, Player } from '@/types/game';
+import { ActionType, Player, PlayerRole } from '@/types/game';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,11 +23,9 @@ const VotingPanel = () => {
 
   if (!currentPlayer || currentPlayer.status === 'dead') return null;
   
-  // Function to render action buttons based on the current player's role and game phase
   const renderActionButtons = () => {
     if (gameState.phase === 'gameOver') return null;
     
-    // Village voting during day
     if (gameState.phase === 'voting' && currentPlayer.role !== 'moderator') {
       return (
         <VoteAction 
@@ -42,11 +39,9 @@ const VotingPanel = () => {
       );
     }
     
-    // Night actions for special roles
     if (gameState.phase === 'night') {
       const actions = [];
       
-      // Wolf killing action
       if (currentPlayer.role === 'wolf') {
         actions.push(
           <VoteAction 
@@ -62,7 +57,6 @@ const VotingPanel = () => {
         );
       }
       
-      // Seer reveal action
       if (currentPlayer.role === 'seer') {
         actions.push(
           <VoteAction 
@@ -77,7 +71,6 @@ const VotingPanel = () => {
         );
       }
       
-      // Witch save action
       if (currentPlayer.role === 'witch') {
         actions.push(
           <VoteAction 
@@ -91,7 +84,6 @@ const VotingPanel = () => {
           />
         );
         
-        // Witch kill action
         actions.push(
           <VoteAction 
             key="witch-kill"
@@ -105,7 +97,6 @@ const VotingPanel = () => {
         );
       }
       
-      // Hunter can only shoot if they're dying
       if (currentPlayer.role === 'hunter' && 
           ((gameState.nightActions.wolfKill === currentPlayer.id && !gameState.nightActions.witchSave) || 
            gameState.nightActions.witchKill === currentPlayer.id)) {
@@ -149,8 +140,6 @@ const VotingPanel = () => {
     excludeRoles?: PlayerRole[];
   }
   
-  type PlayerRole = 'villager' | 'wolf' | 'seer' | 'witch' | 'hunter' | 'moderator';
-  
   const VoteAction = ({ 
     title, 
     description, 
@@ -164,9 +153,7 @@ const VotingPanel = () => {
     
     const currentVote = getCurrentVote(actionType);
     
-    // Get eligible targets for this action
     const getEligibleTargets = (): Player[] => {
-      // Default to all alive players except current player and excluded roles
       let targets = getAlivePlayersWithoutRole('moderator')
         .filter(p => p.id !== currentPlayer!.id && !excludeRoles.includes(p.role));
       

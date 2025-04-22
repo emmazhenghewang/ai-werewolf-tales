@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Player, PlayerRole } from '@/types/game';
@@ -72,9 +73,11 @@ const GameSetup = () => {
     const roleCounts: Record<PlayerRole, number> = {
       villager: 0,
       wolf: 0,
+      wolfKing: 0,
       seer: 0,
       witch: 0,
       hunter: 0,
+      guard: 0,
       moderator: 0,
     };
     

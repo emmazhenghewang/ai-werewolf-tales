@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { ActionType, ChatMessage, ChatMessageType, GamePhase, GameState, Player, PlayerRole, VoteAction, SimulationScriptAction, DefaultScriptAction } from '@/types/game';
+import { ActionType, ChatMessage, ChatMessageType, GamePhase, GameState, Player, PlayerRole, PlayerStatus, VoteAction, SimulationScriptAction, DefaultScriptAction } from '@/types/game';
 import { useToast } from '@/components/ui/use-toast';
 
 type GameContextType = {
@@ -74,7 +73,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     };
 
     setGameState(prev => {
-      // Always send moderator messages to the village chat for public visibility
       if (type === 'moderator') {
         return {
           ...prev,
@@ -163,7 +161,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       id: uuidv4(),
       name,
       role,
-      status: 'alive',
+      status: 'alive' as PlayerStatus,
       isAI,
     };
 
@@ -280,7 +278,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           }));
           break;
         case 'guardProtect':
-          // Guard cannot protect the same player in consecutive rounds
           if (gameState.nightActions.lastGuardTarget === targetId) {
             toast({
               title: "Invalid protection",
@@ -333,7 +330,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       case 'night':
         processNightActions();
         
-        // Set first speaker for the day
         const alivePlayers = gameState.players.filter(p => 
           p.status === 'alive' && p.role !== 'moderator'
         );
@@ -436,17 +432,14 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const { wolfKill, witchSave, witchKill, guardTarget } = gameState.nightActions;
     let killedPlayerId = wolfKill;
     
-    // Check if guard protected the target
     if (wolfKill && guardTarget && wolfKill === guardTarget) {
       killedPlayerId = null;
       addSystemMessage("A villager was attacked in the night, but someone mysterious protected them!", 'moderator');
     } 
-    // Check if witch saved the target
     else if (wolfKill && witchSave && wolfKill === witchSave) {
       killedPlayerId = null;
       addSystemMessage("A villager was attacked in the night, but someone mysterious saved them!", 'moderator');
     } 
-    // Process wolf kill
     else if (wolfKill) {
       const killedPlayer = gameState.players.find(p => p.id === wolfKill);
       if (killedPlayer) {
@@ -459,7 +452,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           ),
         }));
         
-        // Process Hunter or Wolf King ability if they were killed
         if (killedPlayer.role === 'hunter') {
           addSystemMessage(`The Hunter gets a final shot before dying!`, 'moderator');
           processHunterAbility(killedPlayer.id);
@@ -470,7 +462,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // Process witch kill
     if (witchKill) {
       const killedPlayer = gameState.players.find(p => p.id === witchKill);
       if (killedPlayer) {
@@ -483,7 +474,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           ),
         }));
         
-        // Process Hunter or Wolf King ability if they were killed
         if (killedPlayer.role === 'hunter') {
           addSystemMessage(`The Hunter gets a final shot before dying!`, 'moderator');
           processHunterAbility(killedPlayer.id);
@@ -494,7 +484,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // Process Seer reveal if applicable
     if (gameState.nightActions.seerReveal) {
       const targetId = gameState.nightActions.seerReveal;
       const target = gameState.players.find(p => p.id === targetId);
@@ -504,11 +493,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         const isWolf = target.role === 'wolf' || target.role === 'wolfKing';
         const secretMessage = `You examined ${target.name} and discovered they ${isWolf ? 'ARE' : 'are NOT'} a werewolf.`;
         
-        // Send private message to the seer (in actual gameplay)
-        // For simulation, we'll just log it
         console.log(`Seer information: ${secretMessage}`);
         
-        // Add a message to the moderator chat that only shows to the seer
         const seerMessage: ChatMessage = {
           id: uuidv4(),
           senderId: 'system',
@@ -518,8 +504,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           type: 'system',
         };
         
-        // In a real application, this would be sent to only the seer
-        // For now, we'll just add it to the wolf chat for demonstration
         setGameState(prev => ({
           ...prev,
           messages: {
@@ -560,7 +544,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           ),
         }));
         
-        // If hunter killed the wolf king, process wolf king ability
         if (target.role === 'wolfKing') {
           addSystemMessage(`The Wolf King howls with rage as they die, choosing a final victim!`, 'moderator');
           processWolfKingAbility(target.id);
@@ -583,7 +566,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           ),
         }));
         
-        // If wolf king killed the hunter, process hunter ability
         if (target.role === 'hunter') {
           addSystemMessage(`The Hunter gets a final shot before dying!`, 'moderator');
           processHunterAbility(target.id);
@@ -631,7 +613,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           ),
         }));
         
-        // Process special abilities for hunter and wolf king
         if (target.role === 'hunter') {
           addSystemMessage(`The Hunter gets a final shot before dying!`, 'moderator');
           processHunterAbility(target.id);
@@ -651,17 +632,15 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       p.role !== 'wolf' && p.role !== 'wolfKing' && p.role !== 'villager' && p.role !== 'moderator'
     );
     
-    // Bad side wins if they eliminate all villagers or all special roles
     if (aliveVillagers.length === 0 || aliveSpecialVillagers.length === 0) {
-      return 'wolf';  // Represents the wolf team
+      return 'wolf';
     }
     
-    // Good side wins if they eliminate all wolves
     if (aliveWolves.length === 0) {
-      return 'villager';  // Represents the village team
+      return 'villager';
     }
     
-    return null;  // Game continues
+    return null;
   };
 
   const isActionAllowed = (playerId: string, actionType: ActionType): boolean => {
@@ -710,7 +689,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     }
     
     if (currentPlayer.role === 'moderator') {
-      return 'village'; // Moderator sees both channels
+      return 'village';
     }
     
     return 'village';
@@ -722,7 +701,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     
     resetGame();
     
-    // Define roles for a more complex game based on the rules provided
     const roles: PlayerRole[] = [
       'moderator', 'wolfKing', 'wolf', 'wolf', 
       'villager', 'villager', 'villager', 'villager',  
@@ -739,16 +717,15 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       id: uuidv4(),
       name,
       role: roles[index],
-      status: 'alive',
+      status: 'alive' as PlayerStatus,
       isAI: true
     }));
     
-    // Make the user a villager by default
-    const userPlayer = {
+    const userPlayer: Player = {
       id: uuidv4(),
       name: "You",
       role: 'villager' as PlayerRole,
-      status: 'alive',
+      status: 'alive' as PlayerStatus,
       isAI: false
     };
     
@@ -759,12 +736,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       players: [...simulatedPlayers, userPlayer]
     });
     
-    // Delay slightly to ensure all state is updated
     setTimeout(() => {
       startGame();
       
       let step = 0;
-      const totalSteps = 200; // More steps for a more detailed simulation
+      const totalSteps = 200;
       
       const interval = setInterval(() => {
         step++;
@@ -777,7 +753,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         }
         
         simulateGameStep(step);
-      }, 2000); // Slower pace to better follow the action
+      }, 2000);
       
       setSimulationInterval(interval);
     }, 500);
@@ -919,7 +895,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     
     if (!moderator) return defaultScript;
     
-    // NIGHT 1 - First night of the game
     if (day === 1 && phase === 'night') {
       if (step === 1) {
         return {
@@ -1006,7 +981,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           type: 'moderator'
         };
       } else if (step === 13 && witch) {
-        // Witch chooses not to poison anyone on night 1
         return {
           action: 'message',
           senderId: witch.id,
@@ -1021,7 +995,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           type: 'moderator'
         };
       } else if (step === 15 && guard && villagers.length > 0) {
-        // Guard chooses to protect a random villager
         return {
           action: 'vote',
           senderId: guard.id,
@@ -1042,7 +1015,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // DAY 1 - First day discussion
     if (day === 1 && phase === 'day') {
       if (step === 18) {
         return {
@@ -1100,7 +1072,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // VOTING DAY 1
     if (day === 1 && phase === 'voting') {
       if (step === 26) {
         return {
@@ -1207,9 +1178,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // NIGHT 2
     if (day === 2 && phase === 'night') {
-      // A wolf has been eliminated in the voting
       const isFirstWolfEliminated = gameState.players.find(
         p => p.role === 'wolf' && p.name === "Sneaky Wolf" && p.status === 'dead'
       );
@@ -1268,7 +1237,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           type: 'moderator'
         };
       } else if (step === 48 && witch && witch.status === 'alive' && seer && seer.status === 'alive') {
-        // Witch already used potion in night 1
         return {
           action: 'message',
           senderId: moderator.id,
@@ -1283,7 +1251,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           type: 'moderator'
         };
       } else if (step === 50 && witch && witch.status === 'alive' && wolfKing && wolfKing.status === 'alive') {
-        // Witch decides to poison the Wolf King!
         return {
           action: 'vote',
           senderId: witch.id,
@@ -1298,7 +1265,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           type: 'moderator'
         };
       } else if (step === 52 && guard && guard.status === 'alive' && witch && witch.status === 'alive') {
-        // Guard chooses to protect the Witch
         return {
           action: 'vote',
           senderId: guard.id,
@@ -1319,7 +1285,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // DAY 2 - Major casualties
     if (day === 2 && phase === 'day') {
       const deadSeer = gameState.players.find(p => p.role === 'seer' && p.status === 'dead');
       const deadWolfKing = gameState.players.find(p => p.role === 'wolfKing' && p.status === 'dead');
@@ -1337,7 +1302,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         };
       }
       
-      // If Wolf King died and had selected a target
       if (step === 56 && deadWolfKing && hunter && hunter.status === 'alive' && gameState.nightActions.wolfKingTarget) {
         return {
           action: 'message',
@@ -1390,7 +1354,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // VOTING DAY 2
     if (day === 2 && phase === 'voting') {
       const remainingWolf = wolves.find(w => w.status === 'alive');
       
@@ -1478,7 +1441,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // NIGHT 3 - All wolves should be eliminated by now, game may end
     if (day === 3 && phase === 'night') {
       const lastWolfEliminated = wolves.every(w => w.status === 'dead');
       
@@ -1500,12 +1462,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         };
       } else if (step === 77 && lastWolfEliminated) {
         return {
-          action: 'advance', // This should trigger game over
+          action: 'advance',
         };
       }
       
-      // If wolves somehow survived, continue one more night
-      else if (step === 78 && !lastWolfEliminated) {
+      if (step === 78 && !lastWolfEliminated) {
         return {
           action: 'message',
           senderId: moderator.id,
@@ -1530,7 +1491,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // Skip to game over if we reach this point
     if (step > 80) {
       return {
         action: 'advance',
