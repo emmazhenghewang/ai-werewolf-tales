@@ -1,0 +1,233 @@
+
+import React from 'react';
+import { useGame } from '@/context/GameContext';
+import { ActionType, Player } from '@/types/game';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Check, Eye, HeartPulse, Skull, Crosshair } from 'lucide-react';
+
+const VotingPanel = () => {
+  const { 
+    gameState, 
+    currentPlayer, 
+    castVote, 
+    isActionAllowed,
+    getAlivePlayersWithoutRole,
+  } = useGame();
+
+  if (!currentPlayer || currentPlayer.status === 'dead') return null;
+  
+  // Function to render action buttons based on the current player's role and game phase
+  const renderActionButtons = () => {
+    if (gameState.phase === 'gameOver') return null;
+    
+    // Village voting during day
+    if (gameState.phase === 'voting' && currentPlayer.role !== 'moderator') {
+      return (
+        <VoteAction 
+          title="Village Vote" 
+          description="Who do you suspect is a werewolf?" 
+          actionType="vote"
+          icon={<Check className="h-4 w-4 mr-2" />}
+          buttonText="Cast Vote"
+          buttonVariant="accent-button"
+        />
+      );
+    }
+    
+    // Night actions for special roles
+    if (gameState.phase === 'night') {
+      const actions = [];
+      
+      // Wolf killing action
+      if (currentPlayer.role === 'wolf') {
+        actions.push(
+          <VoteAction 
+            key="wolf-kill"
+            title="Wolf Kill" 
+            description="Choose a victim to attack" 
+            actionType="wolfKill"
+            icon={<Skull className="h-4 w-4 mr-2" />}
+            buttonText="Select Victim"
+            buttonVariant="danger-button"
+            excludeRoles={['wolf']}
+          />
+        );
+      }
+      
+      // Seer reveal action
+      if (currentPlayer.role === 'seer') {
+        actions.push(
+          <VoteAction 
+            key="seer-reveal"
+            title="Seer Reveal" 
+            description="Choose a player to reveal their identity" 
+            actionType="seerReveal"
+            icon={<Eye className="h-4 w-4 mr-2" />}
+            buttonText="Reveal Identity"
+            buttonVariant="primary-button"
+          />
+        );
+      }
+      
+      // Witch save action
+      if (currentPlayer.role === 'witch') {
+        actions.push(
+          <VoteAction 
+            key="witch-save"
+            title="Witch Save" 
+            description="Choose a player to save from death" 
+            actionType="witchSave"
+            icon={<HeartPulse className="h-4 w-4 mr-2" />}
+            buttonText="Save Player"
+            buttonVariant="primary-button"
+          />
+        );
+        
+        // Witch kill action
+        actions.push(
+          <VoteAction 
+            key="witch-kill"
+            title="Witch Kill" 
+            description="Choose a player to poison" 
+            actionType="witchKill"
+            icon={<Skull className="h-4 w-4 mr-2" />}
+            buttonText="Poison Player"
+            buttonVariant="danger-button"
+          />
+        );
+      }
+      
+      // Hunter can only shoot if they're dying
+      if (currentPlayer.role === 'hunter' && 
+          ((gameState.nightActions.wolfKill === currentPlayer.id && !gameState.nightActions.witchSave) || 
+           gameState.nightActions.witchKill === currentPlayer.id)) {
+        actions.push(
+          <VoteAction 
+            key="hunter-shoot"
+            title="Hunter's Shot" 
+            description="You're dying! Choose someone to shoot with your last breath" 
+            actionType="hunterShoot"
+            icon={<Crosshair className="h-4 w-4 mr-2" />}
+            buttonText="Shoot Player"
+            buttonVariant="danger-button"
+          />
+        );
+      }
+      
+      return actions;
+    }
+    
+    return null;
+  };
+  
+  const getCurrentVote = (actionType: ActionType) => {
+    const vote = gameState.votes.find(v => 
+      v.voterId === currentPlayer.id && v.actionType === actionType
+    );
+    
+    if (!vote) return null;
+    
+    const targetPlayer = gameState.players.find(p => p.id === vote.targetId);
+    return targetPlayer ? targetPlayer.name : null;
+  };
+  
+  interface VoteActionProps {
+    title: string;
+    description: string;
+    actionType: ActionType;
+    icon: React.ReactNode;
+    buttonText: string;
+    buttonVariant: string;
+    excludeRoles?: PlayerRole[];
+  }
+  
+  type PlayerRole = 'villager' | 'wolf' | 'seer' | 'witch' | 'hunter' | 'moderator';
+  
+  const VoteAction = ({ 
+    title, 
+    description, 
+    actionType, 
+    icon, 
+    buttonText, 
+    buttonVariant,
+    excludeRoles = ['moderator'] 
+  }: VoteActionProps) => {
+    if (!isActionAllowed(currentPlayer!.id, actionType)) return null;
+    
+    const currentVote = getCurrentVote(actionType);
+    
+    // Get eligible targets for this action
+    const getEligibleTargets = (): Player[] => {
+      // Default to all alive players except current player and excluded roles
+      let targets = getAlivePlayersWithoutRole('moderator')
+        .filter(p => p.id !== currentPlayer!.id && !excludeRoles.includes(p.role));
+      
+      return targets;
+    };
+    
+    return (
+      <div className="mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-bold text-werewolf-accent">{title}</h3>
+          {currentVote && (
+            <div className="text-sm">
+              Current choice: <span className="font-bold">{currentVote}</span>
+            </div>
+          )}
+        </div>
+        
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className={buttonVariant}>
+              {icon}
+              {buttonText}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-werewolf-darker border-werewolf-primary">
+            <DialogHeader>
+              <DialogTitle className="text-werewolf-accent">{title}</DialogTitle>
+              <DialogDescription>{description}</DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-2 py-4">
+              {getEligibleTargets().map((player) => (
+                <Button
+                  key={player.id}
+                  className={`justify-start ${buttonVariant}`}
+                  onClick={() => {
+                    castVote(player.id, actionType);
+                  }}
+                >
+                  {player.name}
+                </Button>
+              ))}
+              
+              {getEligibleTargets().length === 0 && (
+                <div className="text-center text-werewolf-secondary py-2">
+                  No eligible targets available
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  };
+
+  return (
+    <div className="border-medieval p-4 rounded-md">
+      <h2 className="werewolf-header text-xl mb-4">Actions</h2>
+      {renderActionButtons()}
+    </div>
+  );
+};
+
+export default VotingPanel;

@@ -1,92 +1,71 @@
+
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Uncial+Antiqua&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 250 15% 10%;
+    --foreground: 40 36% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 257 26% 13%;
+    --card-foreground: 40 36% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 257 26% 13%;
+    --popover-foreground: 40 36% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 260 40% 38%;
+    --primary-foreground: 40 36% 95%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 350 20% 60%;
+    --secondary-foreground: 40 36% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 260 15% 25%;
+    --muted-foreground: 40 15% 70%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 35 84% 56%;
+    --accent-foreground: 250 15% 10%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 65% 40%;
+    --destructive-foreground: 40 36% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 260 15% 28%;
+    --input: 260 15% 28%;
+    --ring: 35 84% 56%;
 
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+  .day-mode {
+    --background: 40 36% 92%;
+    --foreground: 257 26% 13%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 40 30% 88%;
+    --card-foreground: 257 26% 13%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 40 30% 88%;
+    --popover-foreground: 257 26% 13%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 260 40% 38%;
+    --primary-foreground: 40 36% 95%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 350 20% 60%;
+    --secondary-foreground: 40 36% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 35 20% 75%;
+    --muted-foreground: 257 15% 25%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 35 84% 56%;
+    --accent-foreground: 257 26% 13%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 65% 40%;
+    --destructive-foreground: 40 36% 95%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 35 20% 65%;
+    --input: 35 20% 65%;
+    --ring: 35 84% 56%;
   }
 }
 
@@ -96,6 +75,61 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-werewolf-dark text-werewolf-parchment font-medieval;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='%232e294e' fill-opacity='0.4'%3E%3Cpath d='M20 0C9 0 0 9 0 20s9 20 20 20 20-9 20-20S31 0 20 0zm0 37c-9.4 0-17-7.6-17-17S10.6 3 20 3s17 7.6 17 17-7.6 17-17 17z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+
+@layer components {
+  .werewolf-header {
+    @apply font-parchment text-werewolf-accent font-bold uppercase tracking-wide;
+  }
+  
+  .chat-bubble {
+    @apply p-3 rounded-lg max-w-xs lg:max-w-md;
+  }
+  
+  .village-chat {
+    @apply chat-bubble bg-werewolf-village text-werewolf-darker;
+  }
+  
+  .wolf-chat {
+    @apply chat-bubble bg-werewolf-blood text-werewolf-parchment;
+  }
+  
+  .moderator-chat {
+    @apply chat-bubble bg-werewolf-night text-werewolf-accent font-bold;
+  }
+  
+  .system-chat {
+    @apply chat-bubble bg-werewolf-primary text-werewolf-parchment italic;
+  }
+  
+  .parchment-bg {
+    @apply bg-werewolf-parchment text-werewolf-darker rounded-md shadow-md;
+  }
+  
+  .medieval-button {
+    @apply px-4 py-2 rounded-md font-bold transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .primary-button {
+    @apply medieval-button bg-werewolf-primary text-werewolf-parchment hover:bg-werewolf-primary/80;
+  }
+  
+  .secondary-button {
+    @apply medieval-button bg-werewolf-secondary text-werewolf-darker hover:bg-werewolf-secondary/80;
+  }
+  
+  .accent-button {
+    @apply medieval-button bg-werewolf-accent text-werewolf-darker hover:bg-werewolf-accent/80;
+  }
+  
+  .danger-button {
+    @apply medieval-button bg-werewolf-blood text-werewolf-parchment hover:bg-werewolf-blood/80;
+  }
+  
+  .border-medieval {
+    @apply border-2 border-werewolf-accent/50 rounded-md shadow-md;
   }
 }

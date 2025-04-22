@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Werewolf game theme colors
+				werewolf: {
+					dark: '#1E1525',
+					darker: '#0F0A12',
+					primary: '#583C87',
+					secondary: '#A28089',
+					accent: '#E09F3E',
+					blood: '#9A2B2B',
+					night: '#2E294E',
+					village: '#8B7E74',
+					parchment: '#F3EAD3'
 				}
 			},
 			borderRadius: {
@@ -84,11 +97,33 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0'
+					},
+					'100%': {
+						opacity: '1'
+					}
+				},
+				'pulse-subtle': {
+					'0%, 100%': {
+						opacity: '1'
+					},
+					'50%': {
+						opacity: '0.8'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite'
+			},
+			fontFamily: {
+				medieval: ['MedievalSharp', 'cursive'],
+				parchment: ['Uncial Antiqua', 'cursive']
 			}
 		}
 	},
