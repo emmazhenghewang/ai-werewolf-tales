@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Player, PlayerRole } from '@/types/game';
@@ -22,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Check, Plus, Trash2, User, UserPlus } from 'lucide-react';
+import { Check, Plus, Trash2, User, UserPlus, Play } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 const GameSetup = () => {
@@ -85,10 +84,8 @@ const GameSetup = () => {
   
   const roleCounts = countRoles();
   
-  // Calculate how many players we need to meet the required 9 (plus moderator)
   const playersNeeded = 10 - gameState.players.length;
   
-  // Check if we have the required roles
   const hasRequiredRoles = 
     roleCounts.villager >= 3 && 
     roleCounts.wolf === 3 && 
@@ -96,6 +93,10 @@ const GameSetup = () => {
     roleCounts.witch === 1 && 
     roleCounts.hunter === 1 && 
     roleCounts.moderator === 1;
+  
+  const startGame = () => {
+    // Logic to start the game
+  };
   
   return (
     <div className="border-medieval p-4 rounded-md">
@@ -270,14 +271,12 @@ const GameSetup = () => {
         <Button 
           className="accent-button w-full"
           onClick={() => {
-            // Fill with AI players to meet requirements
             const aiNames = [
               "AI_Olivia", "AI_Noah", "AI_Emma", "AI_Liam", 
               "AI_Ava", "AI_William", "AI_Sophia", "AI_James", 
               "AI_Isabella", "AI_Benjamin"
             ];
             
-            // Add players for each missing role
             const missingRoles: PlayerRole[] = [];
             
             if (roleCounts.villager < 3) {
@@ -297,14 +296,12 @@ const GameSetup = () => {
             if (roleCounts.hunter < 1) missingRoles.push('hunter');
             if (roleCounts.moderator < 1) missingRoles.push('moderator');
             
-            // Add AI players with appropriate roles
             let aiNameIndex = 0;
             missingRoles.forEach(role => {
               const name = aiNames[aiNameIndex % aiNames.length];
               addPlayer(name, true);
               aiNameIndex++;
               
-              // Need to set role after adding player
               setTimeout(() => {
                 const newPlayer = gameState.players.find(p => p.name === name);
                 if (newPlayer) {
@@ -318,6 +315,18 @@ const GameSetup = () => {
           Auto-fill with AI Players
         </Button>
       </div>
+      
+      {hasRequiredRoles && (
+        <div className="mt-4">
+          <Button 
+            className="accent-button w-full" 
+            onClick={startGame}
+          >
+            <Play className="h-4 w-4 mr-2" />
+            Start Game
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
