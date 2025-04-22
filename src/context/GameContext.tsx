@@ -1,6 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { ActionType, ChatMessage, ChatMessageType, GamePhase, GameState, Player, PlayerRole, VoteAction } from '@/types/game';
+import { ActionType, ChatMessage, ChatMessageType, GamePhase, GameState, Player, PlayerRole, VoteAction, SimulationScriptAction, DefaultScriptAction } from '@/types/game';
 import { useToast } from '@/components/ui/use-toast';
 
 type GameContextType = {

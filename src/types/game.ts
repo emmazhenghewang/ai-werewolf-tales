@@ -73,3 +73,32 @@ export type GameState = {
   };
   winners: PlayerRole | null;
 };
+
+// Adding the missing type definitions
+export type MessageScriptAction = {
+  action: 'message';
+  senderId: string;
+  content: string;
+  type: string;
+};
+
+export type VoteScriptAction = {
+  action: 'vote';
+  senderId: string;
+  targetId: string;
+  voteType: string;
+};
+
+export type AdvanceScriptAction = {
+  action: 'advance';
+};
+
+export type DefaultScriptAction = {
+  action: 'none';
+};
+
+export type SimulationScriptAction = 
+  | MessageScriptAction
+  | VoteScriptAction 
+  | AdvanceScriptAction
+  | DefaultScriptAction;
