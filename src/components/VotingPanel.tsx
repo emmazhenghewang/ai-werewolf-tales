@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useGame } from '@/context/GameContext';
 import { ActionType, Player, PlayerRole } from '@/types/game';
@@ -42,7 +43,7 @@ const VotingPanel = () => {
     if (gameState.phase === 'night') {
       const actions = [];
       
-      if (currentPlayer.role === 'wolf') {
+      if (currentPlayer.role === 'wolf' || currentPlayer.role === 'wolfKing') {
         actions.push(
           <VoteAction 
             key="wolf-kill"
@@ -52,7 +53,7 @@ const VotingPanel = () => {
             icon={<Skull className="h-4 w-4 mr-2" />}
             buttonText="Select Victim"
             buttonVariant="danger-button"
-            excludeRoles={['wolf']}
+            excludeRoles={['wolf', 'wolfKing']}
           />
         );
       }
@@ -108,6 +109,34 @@ const VotingPanel = () => {
             actionType="hunterShoot"
             icon={<Crosshair className="h-4 w-4 mr-2" />}
             buttonText="Shoot Player"
+            buttonVariant="danger-button"
+          />
+        );
+      }
+      
+      if (currentPlayer.role === 'guard') {
+        actions.push(
+          <VoteAction 
+            key="guard-protect"
+            title="Guard Protection" 
+            description="Choose a player to protect tonight" 
+            actionType="guardProtect"
+            icon={<HeartPulse className="h-4 w-4 mr-2" />}
+            buttonText="Protect Player"
+            buttonVariant="primary-button"
+          />
+        );
+      }
+      
+      if (currentPlayer.role === 'wolfKing' && currentPlayer.status === 'dead') {
+        actions.push(
+          <VoteAction 
+            key="wolfking-kill"
+            title="Wolf King's Last Revenge" 
+            description="You're dying! Choose someone to drag to death with you" 
+            actionType="wolfKingKill"
+            icon={<Skull className="h-4 w-4 mr-2" />}
+            buttonText="Take Revenge"
             buttonVariant="danger-button"
           />
         );
