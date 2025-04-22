@@ -3,7 +3,7 @@ import React from 'react';
 import { useGame } from '@/context/GameContext';
 import { Player, PlayerRole } from '@/types/game';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Skull, User, Shield, Eye, Flask, Crosshair } from 'lucide-react';
+import { Heart, Skull, User, Shield, Eye, Potion, Crosshair } from 'lucide-react';
 
 const PlayerList = () => {
   const { gameState, currentPlayer } = useGame();
@@ -19,7 +19,7 @@ const PlayerList = () => {
       case 'seer':
         return <Eye className="h-5 w-5 text-werewolf-accent" />;
       case 'witch':
-        return <Flask className="h-5 w-5 text-werewolf-secondary" />;
+        return <Potion className="h-5 w-5 text-werewolf-secondary" />;
       case 'hunter':
         return <Crosshair className="h-5 w-5 text-werewolf-accent" />;
       case 'moderator':
