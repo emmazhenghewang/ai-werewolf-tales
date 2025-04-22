@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Player, PlayerRole } from '@/types/game';
@@ -25,6 +24,7 @@ import {
 import { Check, Plus, Trash2, User, UserPlus, Play, Film } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 const GameSetup = () => {
   const { gameState, addPlayer, removePlayer, setPlayers, currentPlayer, startGame: contextStartGame, simulateFullGame } = useGame();
@@ -137,7 +137,8 @@ const GameSetup = () => {
       // Generate unique name
       const name = `${aiNames[index % aiNames.length]}${Math.floor(Math.random() * 100)}`;
       
-      const newPlayer: Player = {
+      // Create a new player with generated ID
+      const newPlayer = {
         id: uuidv4(),
         name,
         role,
@@ -145,11 +146,8 @@ const GameSetup = () => {
         isAI: true
       };
       
-      // Add the player directly to the players array
-      setGameState(prev => ({
-        ...prev,
-        players: [...prev.players, newPlayer]
-      }));
+      // Add the player using the addPlayer function from context
+      addPlayer(name, true, role);
       
       playersAdded++;
     });
@@ -167,14 +165,6 @@ const GameSetup = () => {
     }
   };
 
-  // Generate UUID for use in the autofill function
-  const uuidv4 = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  };
-  
   return (
     <div className="border-medieval p-4 rounded-md">
       <h2 className="werewolf-header text-xl mb-4">Game Setup</h2>
