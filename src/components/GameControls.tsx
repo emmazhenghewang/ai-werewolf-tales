@@ -13,10 +13,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Moon, Sun, Check, RotateCcw } from 'lucide-react';
+import { Moon, Sun, Check, RotateCcw, Play } from 'lucide-react';
 
 const GameControls = () => {
-  const { gameState, currentPlayer, advancePhase, resetGame } = useGame();
+  const { gameState, currentPlayer, advancePhase, resetGame, simulateFullGame, setNextSpeaker } = useGame();
 
   // Only moderator can control game phases
   const isGameModerator = currentPlayer?.role === 'moderator';
@@ -46,15 +46,27 @@ const GameControls = () => {
           </Button>
         );
       case 'day':
-        return (
-          <Button 
-            className="primary-button"
-            onClick={() => advancePhase()}
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Begin Voting
-          </Button>
-        );
+        if (gameState.speakingPlayerId) {
+          return (
+            <Button 
+              className="primary-button"
+              onClick={() => setNextSpeaker()}
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Next Speaker
+            </Button>
+          );
+        } else {
+          return (
+            <Button 
+              className="primary-button"
+              onClick={() => advancePhase()}
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Begin Voting
+            </Button>
+          );
+        }
       case 'voting':
         return (
           <Button 
@@ -108,10 +120,14 @@ const GameControls = () => {
   const getGameWinnerDisplay = () => {
     if (gameState.phase !== 'gameOver' || !gameState.winners) return null;
     
+    const winnerText = gameState.winners === 'wolf' || gameState.winners === 'wolfKing' 
+      ? 'The Werewolves' 
+      : 'The Villagers';
+    
     return (
       <div className="text-center my-4">
-        <div className={`text-xl font-bold ${gameState.winners === 'wolf' ? 'text-werewolf-blood' : 'text-werewolf-accent'}`}>
-          {gameState.winners === 'wolf' ? 'The Werewolves' : 'The Villagers'} have won!
+        <div className={`text-xl font-bold ${gameState.winners === 'wolf' || gameState.winners === 'wolfKing' ? 'text-werewolf-blood' : 'text-werewolf-accent'}`}>
+          {winnerText} have won!
         </div>
       </div>
     );
@@ -155,8 +171,20 @@ const GameControls = () => {
       
       {getGameWinnerDisplay()}
       
-      <div className="flex justify-center">
-        {renderPhaseButton()}
+      <div className="flex flex-col gap-2">
+        <div className="flex justify-center">
+          {renderPhaseButton()}
+        </div>
+        
+        {gameState.phase === 'lobby' && (
+          <Button 
+            className="w-full mt-2 bg-werewolf-blood text-werewolf-parchment hover:bg-werewolf-blood/80"
+            onClick={simulateFullGame}
+          >
+            <Play className="h-4 w-4 mr-2" />
+            Watch Full Game Simulation
+          </Button>
+        )}
       </div>
     </div>
   );

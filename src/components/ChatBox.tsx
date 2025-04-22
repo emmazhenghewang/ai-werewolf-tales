@@ -19,11 +19,15 @@ const ChatBox = () => {
     if (gameState.phase === 'gameOver') return true;
     if (currentPlayer.role === 'moderator') return true;
     
-    // During day and voting, all living players can chat
-    if (gameState.phase === 'day' || gameState.phase === 'voting') return true;
+    // During day and voting, only the speaking player or everyone during voting can chat
+    if (gameState.phase === 'day') {
+      return gameState.speakingPlayerId === currentPlayer.id;
+    }
+    
+    if (gameState.phase === 'voting') return true;
     
     // During night, only wolves can chat in wolf chat
-    if (gameState.phase === 'night' && currentPlayer.role === 'wolf') return true;
+    if (gameState.phase === 'night' && (currentPlayer.role === 'wolf' || currentPlayer.role === 'wolfKing')) return true;
     
     return false;
   };
@@ -33,7 +37,7 @@ const ChatBox = () => {
     if (!currentPlayer) return 'village';
     
     if (currentPlayer.role === 'moderator') return 'moderator';
-    if (gameState.phase === 'night' && currentPlayer.role === 'wolf') return 'wolf';
+    if (gameState.phase === 'night' && (currentPlayer.role === 'wolf' || currentPlayer.role === 'wolfKing')) return 'wolf';
     
     return 'village';
   };
@@ -44,10 +48,14 @@ const ChatBox = () => {
     
     const messages = [];
     
-    // Always show system messages
-    const systemMessages = [...gameState.messages.village, ...gameState.messages.wolf]
-      .filter(m => m.type === 'system' || m.type === 'moderator');
+    // Always show moderator messages
+    const moderatorMessages = [...gameState.messages.village, ...gameState.messages.wolf]
+      .filter(m => m.type === 'moderator');
     
+    messages.push(...moderatorMessages);
+    
+    // Show system messages in the appropriate chat
+    const systemMessages = gameState.messages.village.filter(m => m.type === 'system');
     messages.push(...systemMessages);
     
     // Show village messages during day, voting, or game over
@@ -66,7 +74,7 @@ const ChatBox = () => {
     }
     
     // Wolves see wolf messages during night
-    if (currentPlayer.role === 'wolf' && gameState.phase === 'night') {
+    if ((currentPlayer.role === 'wolf' || currentPlayer.role === 'wolfKing') && gameState.phase === 'night') {
       const wolfMessages = gameState.messages.wolf.filter(m => 
         m.type === 'wolf' && !messages.some(existing => existing.id === m.id)
       );
@@ -124,6 +132,27 @@ const ChatBox = () => {
   };
 
   const visibleMessages = getVisibleMessages();
+  
+  const getChatTitle = () => {
+    if (gameState.phase === 'night' && (currentPlayer?.role === 'wolf' || currentPlayer?.role === 'wolfKing')) {
+      return 'Wolf Chat';
+    }
+    
+    return 'Village Chat';
+  };
+  
+  const getChatStatus = () => {
+    if (gameState.phase === 'night') {
+      return 'Night - Only moderator and wolves can chat';
+    } else if (gameState.phase === 'day' && gameState.speakingPlayerId) {
+      const speaker = gameState.players.find(p => p.id === gameState.speakingPlayerId);
+      return `Day - Only ${speaker?.name} can speak now`;
+    } else if (gameState.phase === 'voting') {
+      return 'Day - Public discussion and voting';
+    } else {
+      return 'Public discussion';
+    }
+  };
 
   return (
     <div className="border-medieval rounded-md overflow-hidden flex flex-col h-full">
@@ -131,16 +160,12 @@ const ChatBox = () => {
         <div className="flex items-center">
           <MessageSquare className="h-4 w-4 mr-2 text-werewolf-accent" />
           <span className="text-werewolf-accent font-bold">
-            {gameState.phase === 'night' && currentPlayer?.role === 'wolf' 
-              ? 'Wolf Chat' 
-              : 'Village Chat'}
+            {getChatTitle()}
           </span>
         </div>
         
         <div className="text-xs text-werewolf-secondary">
-          {gameState.phase === 'night' 
-            ? 'Night - Only moderator and wolves can chat' 
-            : 'Day - Public discussion'}
+          {getChatStatus()}
         </div>
       </div>
 

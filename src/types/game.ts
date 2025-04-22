@@ -2,9 +2,11 @@
 export type PlayerRole = 
   | 'villager'
   | 'wolf'
+  | 'wolfKing'
   | 'seer'
   | 'witch'
   | 'hunter'
+  | 'guard'
   | 'moderator';
 
 export type PlayerStatus = 'alive' | 'dead';
@@ -31,7 +33,9 @@ export type ActionType =
   | 'seerReveal'
   | 'witchSave'
   | 'witchKill'
-  | 'hunterShoot';
+  | 'hunterShoot'
+  | 'wolfKingKill'
+  | 'guardProtect';
 
 export type ChatMessageType = 
   | 'village'
@@ -70,7 +74,15 @@ export type GameState = {
     witchSave: string | null;
     witchKill: string | null;
     hunterTarget: string | null;
+    wolfKingTarget: string | null;
+    guardTarget: string | null;
+    lastGuardTarget: string | null;
   };
+  witchPowers: {
+    hasPotion: boolean;
+    hasPoison: boolean;
+  };
+  speakingPlayerId: string | null;
   winners: PlayerRole | null;
 };
 
