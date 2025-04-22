@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionType, ChatMessage, ChatMessageType, GamePhase, GameState, Player, PlayerRole, VoteAction } from '@/types/game';
@@ -100,6 +99,49 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     
     addSystemMessage("The game has begun! The village falls into a deep slumber as night descends...", 'moderator');
     addSystemMessage("Wolves, choose your victim...", 'wolf');
+
+    // Simulate wolf actions after 5 seconds
+    setTimeout(() => {
+      const villager = gameState.players.find(p => p.role === 'villager');
+      if (villager) {
+        castVote(villager.id, 'wolfKill');
+        addSystemMessage(`The wolves have chosen their victim...`, 'wolf');
+        
+        // Advance to day phase after wolf action
+        setTimeout(() => {
+          advancePhase();
+          
+          // Simulate day discussion
+          setTimeout(() => {
+            const players = gameState.players.filter(p => p.status === 'alive' && !p.isAI);
+            players.forEach((player, index) => {
+              setTimeout(() => {
+                sendMessage(`I think ${villager.name} was acting suspicious...`, 'village');
+              }, index * 2000);
+            });
+            
+            // Move to voting phase
+            setTimeout(() => {
+              advancePhase();
+              
+              // Simulate votes
+              setTimeout(() => {
+                const wolf = gameState.players.find(p => p.role === 'wolf');
+                if (wolf) {
+                  castVote(wolf.id, 'vote');
+                  addSystemMessage(`The village has cast their votes...`, 'moderator');
+                  
+                  // Complete the cycle
+                  setTimeout(() => {
+                    advancePhase();
+                  }, 3000);
+                }
+              }, 3000);
+            }, 10000);
+          }, 2000);
+        }, 3000);
+      }
+    }, 5000);
   };
 
   const resetGame = () => {

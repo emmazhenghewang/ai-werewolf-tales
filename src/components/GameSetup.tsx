@@ -23,13 +23,15 @@ import {
 } from '@/components/ui/dialog';
 import { Check, Plus, Trash2, User, UserPlus, Play } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/components/ui/use-toast';
 
 const GameSetup = () => {
-  const { gameState, addPlayer, removePlayer, setPlayers, currentPlayer } = useGame();
+  const { gameState, addPlayer, removePlayer, setPlayers, currentPlayer, sendMessage } = useGame();
   const [playerName, setPlayerName] = useState('');
   const [isAI, setIsAI] = useState(false);
   const [selectedRole, setSelectedRole] = useState<PlayerRole>('villager');
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const { toast } = useToast();
   
   const handleAddPlayer = () => {
     if (!playerName.trim()) return;
@@ -95,7 +97,84 @@ const GameSetup = () => {
     roleCounts.moderator === 1;
   
   const startGame = () => {
-    // Logic to start the game
+    // Set up AI players if none exist
+    if (gameState.players.length === 0) {
+      // Add moderator
+      addPlayer("AI_Moderator", true);
+      setTimeout(() => {
+        const moderator = gameState.players.find(p => p.name === "AI_Moderator");
+        if (moderator) handleSetRole(moderator.id, 'moderator');
+      }, 10);
+
+      // Add villagers
+      ["AI_John", "AI_Mary", "AI_Sarah"].forEach(name => {
+        addPlayer(name, true);
+        setTimeout(() => {
+          const player = gameState.players.find(p => p.name === name);
+          if (player) handleSetRole(player.id, 'villager');
+        }, 10);
+      });
+
+      // Add wolves
+      ["AI_Wolf1", "AI_Wolf2", "AI_Wolf3"].forEach(name => {
+        addPlayer(name, true);
+        setTimeout(() => {
+          const player = gameState.players.find(p => p.name === name);
+          if (player) handleSetRole(player.id, 'wolf');
+        }, 10);
+      });
+
+      // Add special roles
+      const specialRoles: [string, PlayerRole][] = [
+        ["AI_Seer", 'seer'],
+        ["AI_Witch", 'witch'],
+        ["AI_Hunter", 'hunter']
+      ];
+
+      specialRoles.forEach(([name, role]) => {
+        addPlayer(name, true);
+        setTimeout(() => {
+          const player = gameState.players.find(p => p.name === name);
+          if (player) handleSetRole(player.id, role);
+        }, 10);
+      });
+
+      // Start simulation after a short delay to allow for player setup
+      setTimeout(() => {
+        simulateGameStart();
+      }, 500);
+    } else {
+      simulateGameStart();
+    }
+  };
+
+  const simulateGameStart = () => {
+    // Trigger game start
+    if (hasRequiredRoles) {
+      // Start the game through context
+      const { startGame: contextStartGame } = useGame();
+      contextStartGame();
+
+      // Schedule night phase chat for wolves
+      setTimeout(() => {
+        const wolves = gameState.players.filter(p => p.role === 'wolf');
+        wolves.forEach((wolf, index) => {
+          setTimeout(() => {
+            sendMessage(`Let's target ${gameState.players.find(p => p.role === 'villager')?.name}!`, 'wolf');
+          }, index * 1000);
+        });
+      }, 2000);
+
+      // Schedule day phase discussions
+      setTimeout(() => {
+        const alivePlayers = gameState.players.filter(p => p.status === 'alive' && p.role !== 'moderator');
+        alivePlayers.forEach((player, index) => {
+          setTimeout(() => {
+            sendMessage(`I think we should investigate ${gameState.players.find(p => p.role === 'wolf')?.name}`, 'village');
+          }, index * 1000);
+        });
+      }, 5000);
+    }
   };
   
   return (
