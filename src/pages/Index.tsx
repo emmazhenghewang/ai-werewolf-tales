@@ -24,8 +24,11 @@ const GameScreen = () => {
           <h1 className="text-4xl md:text-5xl font-parchment font-bold text-werewolf-accent mb-2">
             Werewolf Tales
           </h1>
-          <p className="text-werewolf-secondary text-sm md:text-base italic">
+          <p className="text-werewolf-secondary text-sm md:text-base italic mb-1">
             A game of deception, deduction, and survival
+          </p>
+          <p className="text-werewolf-accent text-xs md:text-sm font-bold">
+            MODERATOR VIEW - All Player Information Visible
           </p>
         </header>
         

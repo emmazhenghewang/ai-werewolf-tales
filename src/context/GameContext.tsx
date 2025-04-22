@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionType, ChatMessage, ChatMessageType, GamePhase, GameState, Player, PlayerRole, PlayerStatus, VoteAction, SimulationScriptAction, DefaultScriptAction } from '@/types/game';
@@ -708,9 +709,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     ];
     
     const playerNames = [
-      "Moderator", "Alpha Wolf", "Sneaky Wolf", "Shadow Wolf", 
-      "Innocent Villager", "Suspicious Farmer", "Old Miller", "Young Maiden", 
-      "Mystic Seer", "Wise Witch", "Brave Hunter", "Loyal Guard"
+      "Moderator James", "William Gray", "Michael Hunter", "Emma Wolf", 
+      "Oliver Smith", "Charlotte Jones", "Sophia Davis", "Isabella Moore", 
+      "Noah Taylor", "Amelia Wilson", "Liam Johnson", "Thomas Miller"
     ];
     
     const simulatedPlayers: Player[] = playerNames.map((name, index) => ({
@@ -723,7 +724,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     
     const userPlayer: Player = {
       id: uuidv4(),
-      name: "You",
+      name: "You (Observer)",
       role: 'villager' as PlayerRole,
       status: 'alive' as PlayerStatus,
       isAI: false
@@ -742,7 +743,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       
       let step = 0;
       const totalSteps = 200;
-      const timeDelay = 2000; // 2 seconds between steps
+      const timeDelay = 3000; // 3 seconds between steps for better readability
+      let lastPhase = 'lobby';
+      let stuckCounter = 0;
       
       const interval = setInterval(() => {
         step++;
@@ -752,6 +755,19 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           setSimulationInterval(null);
           setIsSimulationRunning(false);
           return;
+        }
+        
+        // Check if we're stuck in the same phase for too long
+        if (lastPhase === gameState.phase) {
+          stuckCounter++;
+          if (stuckCounter > 10) {
+            console.log("Simulation appears stuck, forcing phase advance");
+            advancePhase();
+            stuckCounter = 0;
+          }
+        } else {
+          stuckCounter = 0;
+          lastPhase = gameState.phase;
         }
         
         simulateGameStep(step);
@@ -907,179 +923,339 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     
     if (!moderator) return defaultScript;
     
-    // DAY 1 - NIGHT PHASE
-    if (day === 1 && phase === 'night') {
-      if (step === 1) {
-        return {
-          action: 'message',
-          senderId: moderator.id,
-          content: "Night falls on the village. Everyone please close your eyes.",
-          type: 'moderator'
-        };
-      } else if (step === 2) {
-        return {
-          action: 'message',
-          senderId: moderator.id,
-          content: "Wolves, please open your eyes and choose your victim.",
-          type: 'moderator'
-        };
-      } else if (step === 3 && wolves.length > 0) {
-        return {
-          action: 'message',
-          senderId: wolves[0]?.id,
-          content: "I think we should target the Seer first before they can identify us.",
-          type: 'wolf'
-        };
-      } else if (step === 4 && wolves.length > 1) {
-        return {
-          action: 'message',
-          senderId: wolves[1]?.id,
-          content: "Agreed. The Seer is our biggest threat.",
-          type: 'wolf'
-        };
-      } else if (step === 5 && wolfKing) {
-        return {
-          action: 'message',
-          senderId: wolfKing.id,
-          content: "Let's go after the Seer. Everyone agree?",
-          type: 'wolf'
-        };
-      } else if (step === 6 && wolfKing && seer) {
-        return {
-          action: 'vote',
-          senderId: wolfKing.id,
-          targetId: seer.id,
-          voteType: 'wolfKill'
-        };
-      } else if (step === 7) {
-        return {
-          action: 'message',
-          senderId: moderator.id,
-          content: "Wolves, thank you. Please close your eyes. Seer, please open your eyes and point to someone you wish to examine.",
-          type: 'moderator'
-        };
-      } else if (step === 8 && seer && villagers.length > 0) {
-        return {
-          action: 'vote',
-          senderId: seer.id,
-          targetId: wolves[0]?.id || villagers[0].id,
-          voteType: 'seerReveal'
-        };
-      } else if (step === 9) {
-        return {
-          action: 'message',
-          senderId: moderator.id,
-          content: "Seer, thank you. Please close your eyes. Witch, please open your eyes. You may use your potion to save someone or your poison to kill someone.",
-          type: 'moderator'
-        };
-      } else if (step === 10 && witch && seer) {
-        // Witch saves the Seer if they were targeted
-        if (gameState.nightActions.wolfKill === seer.id) {
+    // NIGHT PHASE
+    if (phase === 'night') {
+      const nightStep = step % 20; // Create a cycle within night phase
+      
+      switch (nightStep) {
+        case 1:
           return {
-            action: 'vote',
-            senderId: witch.id,
-            targetId: seer.id,
-            voteType: 'witchSave'
+            action: 'message',
+            senderId: moderator.id,
+            content: `Night ${day} falls on the village. All villagers close their eyes and sleep.`,
+            type: 'moderator'
           };
-        } else if (wolves.length > 0) {
-          // Otherwise, try to poison a wolf
+        case 2:
           return {
-            action: 'vote',
-            senderId: witch.id,
-            targetId: wolves[0]?.id,
-            voteType: 'witchKill'
+            action: 'message',
+            senderId: moderator.id,
+            content: "Werewolves, wake up and silently choose a victim.",
+            type: 'moderator'
           };
-        }
-      } else if (step === 11) {
-        return {
-          action: 'message',
-          senderId: moderator.id,
-          content: "Witch, thank you. Please close your eyes. Guard, please open your eyes and point to someone you wish to protect.",
-          type: 'moderator'
-        };
-      } else if (step === 12 && guard && villagers.length > 0) {
-        return {
-          action: 'vote',
-          senderId: guard.id,
-          targetId: seer?.id || villagers[0].id,
-          voteType: 'guardProtect'
-        };
-      } else if (step === 13) {
-        return {
-          action: 'message',
-          senderId: moderator.id,
-          content: "Guard, thank you. Please close your eyes. Everyone, please open your eyes. Dawn is breaking.",
-          type: 'moderator'
-        };
-      } else if (step === 14) {
-        return {
-          action: 'advance'
-        };
+        case 3:
+          if (wolves.length > 0) {
+            return {
+              action: 'message',
+              senderId: wolves[0]?.id,
+              content: `I suggest we eliminate ${villagers[0]?.name || seer?.name}. They seem suspicious.`,
+              type: 'wolf'
+            };
+          }
+          break;
+        case 4:
+          if (wolves.length > 1 && wolfKing) {
+            return {
+              action: 'message',
+              senderId: wolfKing.id,
+              content: "Good suggestion. Let's make our decision.",
+              type: 'wolf'
+            };
+          }
+          break;
+        case 5:
+          if (wolves.length > 0 && villagers.length > 0) {
+            const target = seer || villagers[0];
+            if (target) {
+              return {
+                action: 'vote',
+                senderId: wolves[0].id,
+                targetId: target.id,
+                voteType: 'wolfKill'
+              };
+            }
+          }
+          break;
+        case 6:
+          return {
+            action: 'message',
+            senderId: moderator.id,
+            content: "Werewolves, go back to sleep. Seer, wake up and point to someone to learn their identity.",
+            type: 'moderator'
+          };
+        case 7:
+          if (seer) {
+            const targetIndex = Math.floor(Math.random() * gameState.players.length);
+            const target = gameState.players[targetIndex];
+            if (target && target.role !== 'seer' && target.role !== 'moderator') {
+              return {
+                action: 'vote',
+                senderId: seer.id,
+                targetId: target.id,
+                voteType: 'seerReveal'
+              };
+            }
+          }
+          break;
+        case 8:
+          return {
+            action: 'message',
+            senderId: moderator.id,
+            content: "Seer, go back to sleep. Witch, wake up. You may save someone from death or poison someone.",
+            type: 'moderator'
+          };
+        case 9:
+          if (witch && gameState.witchPowers.hasPotion && gameState.nightActions.wolfKill) {
+            // Witch saves the wolf's target 50% of the time
+            if (Math.random() > 0.5) {
+              const target = gameState.players.find(p => p.id === gameState.nightActions.wolfKill);
+              if (target) {
+                return {
+                  action: 'vote',
+                  senderId: witch.id,
+                  targetId: target.id,
+                  voteType: 'witchSave'
+                };
+              }
+            }
+          }
+          break;
+        case 10:
+          if (witch && gameState.witchPowers.hasPoison && wolves.length > 0) {
+            // Witch tries to poison a wolf sometimes
+            if (Math.random() > 0.7) {
+              return {
+                action: 'vote',
+                senderId: witch.id,
+                targetId: wolves[0].id,
+                voteType: 'witchKill'
+              };
+            }
+          }
+          break;
+        case 11:
+          return {
+            action: 'message',
+            senderId: moderator.id,
+            content: "Witch, go back to sleep. Guard, wake up and choose someone to protect.",
+            type: 'moderator'
+          };
+        case 12:
+          if (guard && villagers.length > 0) {
+            // Guard protects a random villager
+            const randomIndex = Math.floor(Math.random() * villagers.length);
+            return {
+              action: 'vote',
+              senderId: guard.id,
+              targetId: villagers[randomIndex].id,
+              voteType: 'guardProtect'
+            };
+          }
+          break;
+        case 13:
+          return {
+            action: 'message',
+            senderId: moderator.id,
+            content: "Guard, go back to sleep. Hunter, confirm your target in case you die tonight.",
+            type: 'moderator'
+          };
+        case 14:
+          if (hunter && wolves.length > 0) {
+            // Hunter selects their revenge target (a wolf if possible)
+            return {
+              action: 'vote',
+              senderId: hunter.id,
+              targetId: wolves[0].id,
+              voteType: 'hunterShoot'
+            };
+          }
+          break;
+        case 15:
+          if (wolfKing) {
+            // Wolf King selects their revenge target
+            const potentialTargets = villagers.filter(p => p.role !== 'wolfKing' && p.role !== 'wolf');
+            if (potentialTargets.length > 0) {
+              const randomIndex = Math.floor(Math.random() * potentialTargets.length);
+              return {
+                action: 'vote',
+                senderId: wolfKing.id,
+                targetId: potentialTargets[randomIndex].id,
+                voteType: 'wolfKingKill'
+              };
+            }
+          }
+          break;
+        case 16:
+          return {
+            action: 'message',
+            senderId: moderator.id,
+            content: "All roles have acted. The night is over. Dawn is approaching...",
+            type: 'moderator'
+          };
+        case 17:
+          return {
+            action: 'advance'
+          };
       }
     }
     
-    // DAY PHASE - Add statements for the day phase
+    // DAY PHASE
     else if (phase === 'day') {
-      if (step % 3 === 0 && gameState.speakingPlayerId) {
-        // Move to the next speaker
-        return {
-          action: 'advance'
-        };
-      } else if (step % 3 === 1) {
-        const speakingPlayer = gameState.players.find(p => p.id === gameState.speakingPlayerId);
-        if (speakingPlayer) {
-          return {
-            action: 'message',
-            senderId: speakingPlayer.id,
-            content: "I think we need to be careful. The wolves are hiding among us!",
-            type: 'village'
-          };
-        }
-      } else if (step % 5 === 0) {
-        // After several speech exchanges, move to voting
+      const dayStep = step % 15; // Create a cycle within day phase
+      
+      if (dayStep === 1) {
         return {
           action: 'message',
           senderId: moderator.id,
-          content: "All players have spoken. Now it's time to vote.",
+          content: `Day ${day} begins. The village wakes up to discover what happened during the night.`,
           type: 'moderator'
         };
-      } else if (step % 5 === 1) {
+      } else if (dayStep === 2 && gameState.speakingPlayerId) {
+        const speaker = gameState.players.find(p => p.id === gameState.speakingPlayerId);
+        if (speaker) {
+          return {
+            action: 'message',
+            senderId: speaker.id,
+            content: `I didn't notice anything suspicious last night. But we should be careful, the wolves are still among us.`,
+            type: 'village'
+          };
+        }
+      } else if (dayStep === 3 && gameState.speakingPlayerId) {
         return {
-          action: 'advance'
+          action: 'message',
+          senderId: moderator.id,
+          content: "Thank you. Who would like to speak next?",
+          type: 'moderator'
+        };
+      } else if (dayStep === 4) {
+        return {
+          action: 'advance' // Move to next speaker
+        };
+      } else if (dayStep === 5 && gameState.speakingPlayerId) {
+        const speaker = gameState.players.find(p => p.id === gameState.speakingPlayerId);
+        if (speaker) {
+          let content = "I'm not sure who the werewolves are, but we should be careful.";
+          
+          // If speaker is a wolf, act innocent
+          if (speaker.role === 'wolf' || speaker.role === 'wolfKing') {
+            content = "I think we should suspect the quiet ones. Who hasn't been participating much?";
+          }
+          
+          return {
+            action: 'message',
+            senderId: speaker.id,
+            content,
+            type: 'village'
+          };
+        }
+      } else if (dayStep === 6 && gameState.speakingPlayerId) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "Let's hear from someone else now.",
+          type: 'moderator'
+        };
+      } else if (dayStep === 7) {
+        return {
+          action: 'advance' // Move to next speaker
+        };
+      } else if (dayStep === 8 && gameState.speakingPlayerId) {
+        const speaker = gameState.players.find(p => p.id === gameState.speakingPlayerId);
+        if (speaker) {
+          return {
+            action: 'message',
+            senderId: speaker.id,
+            content: "I think we've heard enough. Let's start the voting soon.",
+            type: 'village'
+          };
+        }
+      } else if (dayStep === 9) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "All villagers have spoken. It's time to vote.",
+          type: 'moderator'
+        };
+      } else if (dayStep === 10) {
+        return {
+          action: 'advance' // Move to voting phase
         };
       }
     }
     
     // VOTING PHASE
     else if (phase === 'voting') {
+      const voteStep = step % 10; // Create a cycle within voting phase
+      
+      if (voteStep === 1) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "The voting begins now. Everyone points to who they suspect is a werewolf.",
+          type: 'moderator'
+        };
+      } else if (voteStep >= 2 && voteStep <= 6) {
+        // Have players cast votes
+        const alivePlayersWithoutMod = gameState.players.filter(p => 
+          p.status === 'alive' && p.role !== 'moderator'
+        );
+        
+        if (alivePlayersWithoutMod.length > 1) {
+          const voterIndex = (voteStep - 2) % alivePlayersWithoutMod.length;
+          const voter = alivePlayersWithoutMod[voterIndex];
+          
+          if (voter) {
+            // Select someone to vote for (not themselves)
+            const potentialTargets = alivePlayersWithoutMod.filter(p => p.id !== voter.id);
+            if (potentialTargets.length > 0) {
+              const targetIndex = Math.floor(Math.random() * potentialTargets.length);
+              const target = potentialTargets[targetIndex];
+              
+              return {
+                action: 'vote',
+                senderId: voter.id,
+                targetId: target.id,
+                voteType: 'vote'
+              };
+            }
+          }
+        }
+      } else if (voteStep === 7) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "The voting is complete. The villager with the most votes will be exiled.",
+          type: 'moderator'
+        };
+      } else if (voteStep === 8) {
+        return {
+          action: 'advance' // Process voting and move to next phase
+        };
+      }
+    }
+    
+    // GAME OVER PHASE
+    else if (phase === 'gameOver') {
       if (step === 1) {
         return {
           action: 'message',
           senderId: moderator.id,
-          content: "It's time to vote! Please point to who you suspect is a werewolf.",
+          content: `The game has ended! ${gameState.winners === 'wolf' || gameState.winners === 'wolfKing' ? 'The Werewolves' : 'The Villagers'} have won!`,
           type: 'moderator'
         };
-      } else if (step >= 2 && step <= 5) {
-        // Have players cast votes
-        const voter = villagers[step % villagers.length];
-        if (voter && wolves.length > 0) {
-          return {
-            action: 'vote',
-            senderId: voter.id,
-            targetId: wolves[0].id,
-            voteType: 'vote'
-          };
-        }
-      } else if (step === 6) {
+      } else if (step === 2) {
+        // Reveal all roles
         return {
           action: 'message',
           senderId: moderator.id,
-          content: "The voting is complete. The results will now be tallied.",
+          content: "Here are all the player roles: " + gameState.players.map(p => `${p.name} was a ${p.role}`).join(", "),
           type: 'moderator'
         };
-      } else if (step === 7) {
+      } else if (step === 3) {
         return {
-          action: 'advance'
+          action: 'message',
+          senderId: moderator.id,
+          content: "Thank you for playing! You can start a new game.",
+          type: 'moderator'
         };
       }
     }

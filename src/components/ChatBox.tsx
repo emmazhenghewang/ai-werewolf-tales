@@ -42,46 +42,33 @@ const ChatBox = () => {
     return 'village';
   };
 
-  // Filter messages based on visibility rules
+  // Get all messages from both channels for the moderator view
   const getVisibleMessages = () => {
-    if (!currentPlayer) return [];
-    
     const messages = [];
     
-    // Always show moderator messages
+    // Show all moderator messages
     const moderatorMessages = [...gameState.messages.village, ...gameState.messages.wolf]
       .filter(m => m.type === 'moderator');
-    
     messages.push(...moderatorMessages);
     
-    // Show system messages in the appropriate chat
-    const systemMessages = gameState.messages.village.filter(m => m.type === 'system');
+    // Show all system messages
+    const systemMessages = [...gameState.messages.village, ...gameState.messages.wolf]
+      .filter(m => m.type === 'system');
     messages.push(...systemMessages);
     
-    // Show village messages during day, voting, or game over
-    if (gameState.phase === 'day' || gameState.phase === 'voting' || gameState.phase === 'gameOver') {
-      const villageMessages = gameState.messages.village.filter(m => 
-        m.type === 'village' && m.timestamp <= Date.now()
-      );
-      messages.push(...villageMessages);
-    }
+    // Show all village messages
+    const villageMessages = gameState.messages.village.filter(m => 
+      m.type === 'village' && m.timestamp <= Date.now()
+    );
+    messages.push(...villageMessages);
     
-    // Moderator sees all messages
-    if (currentPlayer.role === 'moderator') {
-      const allMessages = [...gameState.messages.village, ...gameState.messages.wolf]
-        .filter(m => !messages.some(existing => existing.id === m.id));
-      messages.push(...allMessages);
-    }
+    // Show all wolf messages 
+    const wolfMessages = gameState.messages.wolf.filter(m => 
+      m.type === 'wolf' && m.timestamp <= Date.now()
+    );
+    messages.push(...wolfMessages);
     
-    // Wolves see wolf messages during night
-    if ((currentPlayer.role === 'wolf' || currentPlayer.role === 'wolfKing') && gameState.phase === 'night') {
-      const wolfMessages = gameState.messages.wolf.filter(m => 
-        m.type === 'wolf' && !messages.some(existing => existing.id === m.id)
-      );
-      messages.push(...wolfMessages);
-    }
-    
-    // Sort messages by timestamp
+    // Sort all messages by timestamp
     return messages.sort((a, b) => a.timestamp - b.timestamp);
   };
 
@@ -119,10 +106,21 @@ const ChatBox = () => {
     
     bubbleClassName += isCurrentUser ? 'ml-auto' : '';
 
+    // Get player role for moderator view
+    const sender = gameState.players.find(p => p.id === message.senderId);
+    const roleInfo = sender ? ` (${sender.role})` : '';
+    
     return (
       <div key={message.id || index} className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} mb-4`}>
         <div className="text-xs text-werewolf-secondary mb-1">
-          {message.type !== 'system' && `${message.senderName} - ${formatTimestamp(message.timestamp)}`}
+          {message.type !== 'system' && (
+            <>
+              <span className={message.type === 'wolf' ? 'text-werewolf-blood' : ''}>
+                {message.senderName}{roleInfo} - {formatTimestamp(message.timestamp)}
+              </span>
+              {message.type === 'wolf' && <span className="ml-2 text-werewolf-blood">[Wolf Chat]</span>}
+            </>
+          )}
         </div>
         <div className={bubbleClassName}>
           {message.content}
@@ -134,23 +132,21 @@ const ChatBox = () => {
   const visibleMessages = getVisibleMessages();
   
   const getChatTitle = () => {
-    if (gameState.phase === 'night' && (currentPlayer?.role === 'wolf' || currentPlayer?.role === 'wolfKing')) {
-      return 'Wolf Chat';
-    }
-    
-    return 'Village Chat';
+    return 'Game Master View - All Chats';
   };
   
   const getChatStatus = () => {
     if (gameState.phase === 'night') {
-      return 'Night - Only moderator and wolves can chat';
+      return 'Night - Wolves, Seer, Witch, and other night roles are active';
     } else if (gameState.phase === 'day' && gameState.speakingPlayerId) {
       const speaker = gameState.players.find(p => p.id === gameState.speakingPlayerId);
-      return `Day - Only ${speaker?.name} can speak now`;
+      return `Day - ${speaker?.name} is speaking now`;
     } else if (gameState.phase === 'voting') {
-      return 'Day - Public discussion and voting';
+      return 'Day - Public voting in progress';
+    } else if (gameState.phase === 'gameOver') {
+      return 'Game Over - Final Results';
     } else {
-      return 'Public discussion';
+      return 'Game Lobby - Setting up players';
     }
   };
 
