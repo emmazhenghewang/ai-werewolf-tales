@@ -167,7 +167,13 @@ const ChatBox = () => {
 
       <ScrollArea className="flex-grow p-4">
         <div className="space-y-1">
-          {visibleMessages.map((message, index) => renderChatBubble(message, index))}
+          {visibleMessages.length === 0 ? (
+            <div className="text-center text-werewolf-secondary py-8">
+              No messages yet. Start the game to see activity.
+            </div>
+          ) : (
+            visibleMessages.map((message, index) => renderChatBubble(message, index))
+          )}
           <div ref={chatEndRef} />
         </div>
       </ScrollArea>

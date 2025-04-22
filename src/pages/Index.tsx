@@ -27,9 +27,11 @@ const GameScreen = () => {
           <p className="text-werewolf-secondary text-sm md:text-base italic mb-1">
             A game of deception, deduction, and survival
           </p>
-          <p className="text-werewolf-accent text-xs md:text-sm font-bold">
-            MODERATOR VIEW - All Player Information Visible
-          </p>
+          <div className="bg-werewolf-darker/50 rounded-md p-2 inline-block">
+            <p className="text-werewolf-accent text-xs md:text-sm font-bold">
+              MODERATOR VIEW - Phase: {gameState.phase} {gameState.dayCount > 0 && `- Day ${gameState.dayCount}`}
+            </p>
+          </div>
         </header>
         
         {gameState.phase === 'lobby' ? (
