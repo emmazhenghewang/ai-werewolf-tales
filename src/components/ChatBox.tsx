@@ -3,31 +3,79 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChatMessageType } from '@/types/game';
-import { MessageSquare, Users, Send } from 'lucide-react';
+import { MessageSquare, Send } from 'lucide-react';
 
 const ChatBox = () => {
-  const { gameState, currentPlayer, sendMessage, getActiveChannel } = useGame();
+  const { gameState, currentPlayer, sendMessage } = useGame();
   const [messageText, setMessageText] = useState('');
-  const [activeTab, setActiveTab] = useState<'village' | 'wolf'>('village');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const canUseWolfChat = 
-    currentPlayer?.role === 'wolf' && 
-    currentPlayer?.status === 'alive' && 
-    (gameState.phase === 'night' || gameState.phase === 'gameOver');
+  // Determine if current player can chat based on game phase and role
+  const canChat = () => {
+    if (!currentPlayer) return false;
+    if (currentPlayer.status === 'dead') return false;
+    if (gameState.phase === 'gameOver') return true;
+    if (currentPlayer.role === 'moderator') return true;
+    
+    // During day and voting, all living players can chat
+    if (gameState.phase === 'day' || gameState.phase === 'voting') return true;
+    
+    // During night, only wolves can chat in wolf chat
+    if (gameState.phase === 'night' && currentPlayer.role === 'wolf') return true;
+    
+    return false;
+  };
 
-  const canChat = 
-    (gameState.phase === 'day' || gameState.phase === 'voting' || gameState.phase === 'gameOver') || 
-    (gameState.phase === 'night' && (currentPlayer?.role === 'wolf' || currentPlayer?.role === 'moderator'));
+  // Determine appropriate message type based on current phase and player role
+  const getMessageType = (): ChatMessageType => {
+    if (!currentPlayer) return 'village';
+    
+    if (currentPlayer.role === 'moderator') return 'moderator';
+    if (gameState.phase === 'night' && currentPlayer.role === 'wolf') return 'wolf';
+    
+    return 'village';
+  };
 
-  useEffect(() => {
-    // Auto switch to the appropriate channel
-    const channel = getActiveChannel();
-    setActiveTab(channel);
-  }, [getActiveChannel, gameState.phase]);
+  // Filter messages based on visibility rules
+  const getVisibleMessages = () => {
+    if (!currentPlayer) return [];
+    
+    const messages = [];
+    
+    // Always show system messages
+    const systemMessages = [...gameState.messages.village, ...gameState.messages.wolf]
+      .filter(m => m.type === 'system' || m.type === 'moderator');
+    
+    messages.push(...systemMessages);
+    
+    // Show village messages during day, voting, or game over
+    if (gameState.phase === 'day' || gameState.phase === 'voting' || gameState.phase === 'gameOver') {
+      const villageMessages = gameState.messages.village.filter(m => 
+        m.type === 'village' && m.timestamp <= Date.now()
+      );
+      messages.push(...villageMessages);
+    }
+    
+    // Moderator sees all messages
+    if (currentPlayer.role === 'moderator') {
+      const allMessages = [...gameState.messages.village, ...gameState.messages.wolf]
+        .filter(m => !messages.some(existing => existing.id === m.id));
+      messages.push(...allMessages);
+    }
+    
+    // Wolves see wolf messages during night
+    if (currentPlayer.role === 'wolf' && gameState.phase === 'night') {
+      const wolfMessages = gameState.messages.wolf.filter(m => 
+        m.type === 'wolf' && !messages.some(existing => existing.id === m.id)
+      );
+      messages.push(...wolfMessages);
+    }
+    
+    // Sort messages by timestamp
+    return messages.sort((a, b) => a.timestamp - b.timestamp);
+  };
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -36,13 +84,9 @@ const ChatBox = () => {
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageText.trim() || !currentPlayer || !canChat) return;
+    if (!messageText.trim() || !currentPlayer || !canChat()) return;
 
-    const messageType: ChatMessageType = 
-      activeTab === 'wolf' ? 'wolf' :
-      currentPlayer.role === 'moderator' ? 'moderator' : 'village';
-
-    sendMessage(messageText, messageType);
+    sendMessage(messageText, getMessageType());
     setMessageText('');
   };
 
@@ -53,22 +97,22 @@ const ChatBox = () => {
   const renderChatBubble = (message: any, index: number) => {
     const isCurrentUser = message.senderId === currentPlayer?.id;
     
-    let bubbleClassName = 'chat-bubble mb-2 ';
+    let bubbleClassName = 'chat-bubble mb-2 p-3 rounded-lg max-w-[80%] ';
     
     if (message.type === 'wolf') {
-      bubbleClassName += 'wolf-chat ';
+      bubbleClassName += 'bg-werewolf-blood/30 text-werewolf-parchment ';
     } else if (message.type === 'moderator') {
-      bubbleClassName += 'moderator-chat ';
+      bubbleClassName += 'bg-werewolf-accent/30 text-werewolf-parchment ';
     } else if (message.type === 'system') {
-      bubbleClassName += 'system-chat ';
+      bubbleClassName += 'bg-werewolf-secondary/30 text-werewolf-parchment italic ';
     } else {
-      bubbleClassName += 'village-chat ';
+      bubbleClassName += 'bg-werewolf-primary/30 text-werewolf-parchment ';
     }
     
     bubbleClassName += isCurrentUser ? 'ml-auto' : '';
 
     return (
-      <div key={message.id || index} className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}>
+      <div key={message.id || index} className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} mb-4`}>
         <div className="text-xs text-werewolf-secondary mb-1">
           {message.type !== 'system' && `${message.senderName} - ${formatTimestamp(message.timestamp)}`}
         </div>
@@ -79,66 +123,54 @@ const ChatBox = () => {
     );
   };
 
+  const visibleMessages = getVisibleMessages();
+
   return (
     <div className="border-medieval rounded-md overflow-hidden flex flex-col h-full">
-      <Tabs 
-        defaultValue="village" 
-        value={activeTab} 
-        onValueChange={(value) => setActiveTab(value as 'village' | 'wolf')}
-        className="flex flex-col h-full"
-      >
-        <div className="p-2 bg-werewolf-darker border-b border-werewolf-primary/30">
-          <TabsList className="grid grid-cols-2">
-            <TabsTrigger value="village" disabled={!canChat}>
-              <Users className="h-4 w-4 mr-2" />
-              Village
-            </TabsTrigger>
-            <TabsTrigger value="wolf" disabled={!canUseWolfChat}>
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Wolves
-            </TabsTrigger>
-          </TabsList>
+      <div className="p-2 bg-werewolf-darker border-b border-werewolf-primary/30 flex justify-between items-center">
+        <div className="flex items-center">
+          <MessageSquare className="h-4 w-4 mr-2 text-werewolf-accent" />
+          <span className="text-werewolf-accent font-bold">
+            {gameState.phase === 'night' && currentPlayer?.role === 'wolf' 
+              ? 'Wolf Chat' 
+              : 'Village Chat'}
+          </span>
         </div>
+        
+        <div className="text-xs text-werewolf-secondary">
+          {gameState.phase === 'night' 
+            ? 'Night - Only moderator and wolves can chat' 
+            : 'Day - Public discussion'}
+        </div>
+      </div>
 
-        <TabsContent value="village" className="flex-grow flex flex-col p-0 m-0">
-          <ScrollArea className="flex-grow p-4">
-            <div className="space-y-4">
-              {gameState.messages.village.map((message, index) => renderChatBubble(message, index))}
-              <div ref={chatEndRef} />
-            </div>
-          </ScrollArea>
-        </TabsContent>
+      <ScrollArea className="flex-grow p-4">
+        <div className="space-y-1">
+          {visibleMessages.map((message, index) => renderChatBubble(message, index))}
+          <div ref={chatEndRef} />
+        </div>
+      </ScrollArea>
 
-        <TabsContent value="wolf" className="flex-grow flex flex-col p-0 m-0">
-          <ScrollArea className="flex-grow p-4">
-            <div className="space-y-4">
-              {gameState.messages.wolf.map((message, index) => renderChatBubble(message, index))}
-              <div ref={chatEndRef} />
-            </div>
-          </ScrollArea>
-        </TabsContent>
-
-        <form onSubmit={handleSendMessage} className="p-2 border-t border-werewolf-primary/30 bg-werewolf-darker">
-          <div className="flex space-x-2">
-            <Input
-              type="text"
-              placeholder={canChat ? "Type your message..." : "You cannot chat now..."}
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              disabled={!canChat}
-              className="bg-werewolf-darker border-werewolf-primary/50 text-werewolf-parchment"
-            />
-            <Button 
-              type="submit" 
-              disabled={!canChat || !messageText.trim()} 
-              variant="secondary"
-              size="icon"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </form>
-      </Tabs>
+      <form onSubmit={handleSendMessage} className="p-2 border-t border-werewolf-primary/30 bg-werewolf-darker">
+        <div className="flex space-x-2">
+          <Input
+            type="text"
+            placeholder={canChat() ? "Type your message..." : "You cannot chat now..."}
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            disabled={!canChat()}
+            className="bg-werewolf-darker border-werewolf-primary/50 text-werewolf-parchment"
+          />
+          <Button 
+            type="submit" 
+            disabled={!canChat() || !messageText.trim()} 
+            variant="secondary"
+            size="icon"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
