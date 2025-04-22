@@ -951,4 +951,173 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           targetId: seer.id,
           voteType: 'wolfKill'
         };
-      } else if (step ===
+      } else if (step === 7) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "Wolves, thank you. Please close your eyes. Seer, please open your eyes and point to someone you wish to examine.",
+          type: 'moderator'
+        };
+      } else if (step === 8 && seer && villagers.length > 0) {
+        return {
+          action: 'vote',
+          senderId: seer.id,
+          targetId: wolves[0]?.id || villagers[0].id,
+          voteType: 'seerReveal'
+        };
+      } else if (step === 9) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "Seer, thank you. Please close your eyes. Witch, please open your eyes. You may use your potion to save someone or your poison to kill someone.",
+          type: 'moderator'
+        };
+      } else if (step === 10 && witch && seer) {
+        // Witch saves the Seer if they were targeted
+        if (gameState.nightActions.wolfKill === seer.id) {
+          return {
+            action: 'vote',
+            senderId: witch.id,
+            targetId: seer.id,
+            voteType: 'witchSave'
+          };
+        } else if (wolves.length > 0) {
+          // Otherwise, try to poison a wolf
+          return {
+            action: 'vote',
+            senderId: witch.id,
+            targetId: wolves[0]?.id,
+            voteType: 'witchKill'
+          };
+        }
+      } else if (step === 11) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "Witch, thank you. Please close your eyes. Guard, please open your eyes and point to someone you wish to protect.",
+          type: 'moderator'
+        };
+      } else if (step === 12 && guard && villagers.length > 0) {
+        return {
+          action: 'vote',
+          senderId: guard.id,
+          targetId: seer?.id || villagers[0].id,
+          voteType: 'guardProtect'
+        };
+      } else if (step === 13) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "Guard, thank you. Please close your eyes. Everyone, please open your eyes. Dawn is breaking.",
+          type: 'moderator'
+        };
+      } else if (step === 14) {
+        return {
+          action: 'advance'
+        };
+      }
+    }
+    
+    // DAY PHASE - Add statements for the day phase
+    else if (phase === 'day') {
+      if (step % 3 === 0 && gameState.speakingPlayerId) {
+        // Move to the next speaker
+        return {
+          action: 'advance'
+        };
+      } else if (step % 3 === 1) {
+        const speakingPlayer = gameState.players.find(p => p.id === gameState.speakingPlayerId);
+        if (speakingPlayer) {
+          return {
+            action: 'message',
+            senderId: speakingPlayer.id,
+            content: "I think we need to be careful. The wolves are hiding among us!",
+            type: 'village'
+          };
+        }
+      } else if (step % 5 === 0) {
+        // After several speech exchanges, move to voting
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "All players have spoken. Now it's time to vote.",
+          type: 'moderator'
+        };
+      } else if (step % 5 === 1) {
+        return {
+          action: 'advance'
+        };
+      }
+    }
+    
+    // VOTING PHASE
+    else if (phase === 'voting') {
+      if (step === 1) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "It's time to vote! Please point to who you suspect is a werewolf.",
+          type: 'moderator'
+        };
+      } else if (step >= 2 && step <= 5) {
+        // Have players cast votes
+        const voter = villagers[step % villagers.length];
+        if (voter && wolves.length > 0) {
+          return {
+            action: 'vote',
+            senderId: voter.id,
+            targetId: wolves[0].id,
+            voteType: 'vote'
+          };
+        }
+      } else if (step === 6) {
+        return {
+          action: 'message',
+          senderId: moderator.id,
+          content: "The voting is complete. The results will now be tallied.",
+          type: 'moderator'
+        };
+      } else if (step === 7) {
+        return {
+          action: 'advance'
+        };
+      }
+    }
+    
+    return defaultScript;
+  };
+
+  return (
+    <GameContext.Provider
+      value={{
+        gameState,
+        currentPlayer,
+        startGame,
+        resetGame,
+        setPlayers,
+        addPlayer,
+        removePlayer,
+        sendMessage,
+        castVote,
+        advancePhase,
+        determineWinners,
+        isActionAllowed,
+        getAlivePlayersWithRole,
+        getAlivePlayersWithoutRole,
+        getActiveChannel,
+        simulateFullGame,
+        setNextSpeaker,
+      }}
+    >
+      {children}
+    </GameContext.Provider>
+  );
+};
+
+export const useGame = () => {
+  const context = useContext(GameContext);
+  if (context === undefined) {
+    throw new Error('useGame must be used within a GameProvider');
+  }
+  return context;
+};
