@@ -5,28 +5,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Set up dark mysterious, pixel style */
+/* Atmospheric pixel dark background */
+body {
+  @apply bg-mystic-bg text-mystic-accent font-game min-h-screen;
+  background:
+    linear-gradient(120deg, #181828 0%, #232045 100%),
+    url('https://www.transparenttextures.com/patterns/symphony.png'),
+    var(--mystic-noise);
+  background-size: cover, 200px 200px, auto;
+  background-blend-mode: overlay, lighten;
+  letter-spacing: 0.02em;
+  font-family: 'Press Start 2P', monospace;
+  margin: 0;
+}
+
 @layer base {
   :root {
     --background: 230, 10%, 9%;
     --foreground: 230, 13%, 97%;
   }
 
-  body {
-    @apply bg-mystic-bg text-mystic-accent font-game min-h-screen;
-    /* pixel dark starfield */
-    background:
-      linear-gradient(120deg, #181828 0%, #232045 100%),
-      url('https://www.transparenttextures.com/patterns/symphony.png'),
-      var(--mystic-noise);
-    letter-spacing: 0.02em;
-    font-family: 'Press Start 2P', monospace;
-    background-size: cover, 200px 200px, auto;
-    background-blend-mode: overlay, lighten;
-    margin: 0;
-  }
-
-  /* Panels & pixel card */
+  /* Large game setup panels are wider now */
   .pixel-card, .pixel-panel {
     @apply bg-mystic-panel/95 border-4 border-mystic-border rounded-xl shadow-game p-panel;
     backdrop-filter: blur(2px);
@@ -34,24 +33,19 @@
   }
 
   .pixel-header {
-    @apply font-display text-5xl md:text-[3.5rem] text-mystic-yellow drop-shadow text-center mb-3;
+    @apply font-display text-5xl md:text-[3.2rem] text-mystic-yellow drop-shadow text-center mb-3 leading-tight;
     letter-spacing: 0.03em;
-    line-height: 1.08;
   }
-
   .pixel-subheader {
-    @apply font-display text-2xl md:text-2xl text-mystic-blue mt-2 text-center font-thin;
+    @apply font-display text-xl md:text-2xl text-mystic-blue mt-2 text-center font-thin;
     letter-spacing: 0.01em;
   }
-
-  /* Glass card effect */
   .glass-card {
     @apply bg-mystic-card/80 border border-mystic-border shadow-game rounded-xl;
     backdrop-filter: blur(3.5px);
     background-blend-mode: lighten;
   }
 
-  /* Buttons */
   .pixel-btn, .primary-button {
     @apply inline-block rounded-xl font-game text-mystic-bg font-bold px-7 py-3 bg-mystic-yellow border-4 border-mystic-border shadow-game transition-transform transform-gpu active:scale-95 text-xs;
     letter-spacing: 0.01em;
@@ -69,31 +63,27 @@
     @apply pixel-btn bg-mystic-muted text-mystic-accent border-mystic-border;
   }
 
-  /* Pixel look for input/controls */
   .pixel-input {
-    @apply bg-mystic-subtle border-2 border-mystic-purple text-mystic-accent rounded-pixel px-4 py-3 font-game focus:outline-none focus:ring-2 focus:ring-mystic-yellow text-xs;
+    @apply bg-mystic-subtle border-2 border-mystic-purple text-mystic-accent rounded-pixel px-4 py-2 font-game focus:outline-none focus:ring-2 focus:ring-mystic-yellow text-xs;
+    font-size: 12px;
   }
 
-  /* Mystic CTA button for autofill, big and clear */
   .mystic-cta {
     @apply inline-flex items-center justify-center w-full border-4 border-mystic-yellow rounded-xl bg-mystic-yellow text-mystic-bg font-bold py-2 px-6 shadow-game transition-transform duration-100 hover:bg-mystic-yellow/90 text-xs;
     font-family: 'Press Start 2P', monospace;
     letter-spacing: 0.02em;
     margin-top: 8px;
   }
-
   /* Small, crisp font for GameSetup panel roles/lists */
   .setup-role-box {
     @apply text-xs md:text-xs leading-tight;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     font-family: 'Press Start 2P', monospace;
   }
-
   .setup-role-label {
-    @apply text-[10px] md:text-xs text-mystic-muted px-1;
+    @apply text-[11px] md:text-xs text-mystic-muted px-1;
     font-family: 'Press Start 2P', monospace;
   }
-
   .setup-role-count {
     @apply text-xs font-extrabold;
     font-family: 'Press Start 2P', monospace;
@@ -102,7 +92,6 @@
     @apply text-[10px] md:text-xs text-mystic-muted px-0.5;
     font-family: 'Press Start 2P', monospace;
   }
-
   .game-setup-player {
     @apply text-xs md:text-xs font-normal;
     letter-spacing: 0.01em;
@@ -113,8 +102,14 @@
   }
 }
 
+/* Add a larger style for new .bg-mystic-card-lg panel background */
+.bg-mystic-card-lg {
+  background: rgba(35, 35, 55, 0.98);
+}
+
 @layer components {
   .glass {
     @apply bg-mystic-glass backdrop-blur-lg border border-mystic-border rounded-xl;
   }
 }
+
