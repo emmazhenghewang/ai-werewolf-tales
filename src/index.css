@@ -14,15 +14,19 @@
 
   body {
     @apply bg-mystic-bg text-mystic-accent font-game min-h-screen;
-    background-image: linear-gradient(120deg, #181828 0%, #232045 100%), var(--mystic-noise);
+    /* pixel dark starfield */
+    background:
+      linear-gradient(120deg, #181828 0%, #232045 100%),
+      url('https://www.transparenttextures.com/patterns/symphony.png'),
+      var(--mystic-noise);
     letter-spacing: 0.02em;
     font-family: 'Press Start 2P', monospace;
-    /* overlay noise for atmosphere */
-    background-blend-mode: overlay;
+    background-size: cover, 200px 200px, auto;
+    background-blend-mode: overlay, lighten;
     margin: 0;
   }
 
-  /* Main pixel panel/card style */
+  /* Panels & pixel card */
   .pixel-card, .pixel-panel {
     @apply bg-mystic-panel/95 border-4 border-mystic-border rounded-xl shadow-game p-panel;
     backdrop-filter: blur(2px);
@@ -40,13 +44,7 @@
     letter-spacing: 0.01em;
   }
 
-  /* Panel spacing and border */
-  .pixel-panel {
-    @apply mb-section mt-section p-panel;
-    background-color: rgba(34,31,43,0.88);
-  }
-
-  /* Glass card effect for chat/messages etc */
+  /* Glass card effect */
   .glass-card {
     @apply bg-mystic-card/80 border border-mystic-border shadow-game rounded-xl;
     backdrop-filter: blur(3.5px);
@@ -55,7 +53,7 @@
 
   /* Buttons */
   .pixel-btn, .primary-button {
-    @apply inline-block rounded-xl font-game text-mystic-bg font-bold px-7 py-3 bg-mystic-yellow border-4 border-mystic-border shadow-game transition-transform transform-gpu active:scale-95;
+    @apply inline-block rounded-xl font-game text-mystic-bg font-bold px-7 py-3 bg-mystic-yellow border-4 border-mystic-border shadow-game transition-transform transform-gpu active:scale-95 text-xs;
     letter-spacing: 0.01em;
   }
   .pixel-btn:active {
@@ -71,9 +69,44 @@
     @apply pixel-btn bg-mystic-muted text-mystic-accent border-mystic-border;
   }
 
-  /* Pixel pixel look for all input and controls */
+  /* Pixel look for input/controls */
   .pixel-input {
-    @apply bg-mystic-subtle border-2 border-mystic-purple text-mystic-accent rounded-pixel px-4 py-3 font-game focus:outline-none focus:ring-2 focus:ring-mystic-yellow;
+    @apply bg-mystic-subtle border-2 border-mystic-purple text-mystic-accent rounded-pixel px-4 py-3 font-game focus:outline-none focus:ring-2 focus:ring-mystic-yellow text-xs;
+  }
+
+  /* Mystic CTA button for autofill, big and clear */
+  .mystic-cta {
+    @apply inline-flex items-center justify-center w-full border-4 border-mystic-yellow rounded-xl bg-mystic-yellow text-mystic-bg font-bold py-3 px-6 shadow-game transition-transform duration-100 hover:bg-mystic-yellow/90 text-xs;
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 0.02em;
+    margin-top: 8px;
+  }
+
+  /* Small, crisp font for GameSetup panel roles/lists */
+  .setup-role-box {
+    @apply text-xs md:text-xs leading-tight;
+    letter-spacing: 0.02em;
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  .setup-role-label {
+    @apply text-[10px] md:text-xs text-mystic-muted px-1;
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  .setup-role-count {
+    @apply text-xs font-extrabold;
+    font-family: 'Press Start 2P', monospace;
+  }
+  .game-setup-label {
+    @apply text-[10px] md:text-xs text-mystic-muted px-0.5;
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  .game-setup-player {
+    @apply text-xs md:text-xs font-normal;
+    letter-spacing: 0.01em;
+    font-family: 'Press Start 2P', monospace;
   }
   .border-pixel {
     @apply border-4 border-mystic-border;
@@ -85,4 +118,3 @@
     @apply bg-mystic-glass backdrop-blur-lg border border-mystic-border rounded-xl;
   }
 }
-
