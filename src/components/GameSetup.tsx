@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Player, PlayerRole } from '@/types/game';
@@ -21,13 +22,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Check, Plus, Trash2, User, UserPlus, Play, Film } from 'lucide-react';
+import { Check, Plus, Trash2, User, UserPlus, Play } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 
 const GameSetup = () => {
-  const { gameState, addPlayer, removePlayer, setPlayers, currentPlayer, startGame: contextStartGame, simulateFullGame } = useGame();
+  const { gameState, addPlayer, removePlayer, setPlayers, currentPlayer, startGame: contextStartGame } = useGame();
   const [playerName, setPlayerName] = useState('');
   const [isAI, setIsAI] = useState(false);
   const [selectedRole, setSelectedRole] = useState<PlayerRole>('villager');

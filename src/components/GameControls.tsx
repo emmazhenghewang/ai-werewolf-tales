@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import {
 import { Moon, Sun, Check, RotateCcw, Play } from 'lucide-react';
 
 const GameControls = () => {
-  const { gameState, currentPlayer, advancePhase, resetGame, simulateFullGame, setNextSpeaker } = useGame();
+  const { gameState, currentPlayer, advancePhase, resetGame, setNextSpeaker } = useGame();
 
   // Only moderator can control game phases
   const isGameModerator = currentPlayer?.role === 'moderator';
@@ -175,16 +174,6 @@ const GameControls = () => {
         <div className="flex justify-center">
           {renderPhaseButton()}
         </div>
-        
-        {gameState.phase === 'lobby' && (
-          <Button 
-            className="w-full mt-2 bg-werewolf-blood text-werewolf-parchment hover:bg-werewolf-blood/80"
-            onClick={simulateFullGame}
-          >
-            <Play className="h-4 w-4 mr-2" />
-            Watch Full Game Simulation
-          </Button>
-        )}
       </div>
     </div>
   );
