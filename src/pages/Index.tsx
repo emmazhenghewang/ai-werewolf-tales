@@ -11,7 +11,6 @@ const GameScreen = () => {
   const { gameState } = useGame();
 
   useEffect(() => {
-    // Optionally: Scroll to top on phase change for dramatic effect
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [gameState.phase]);
 
@@ -24,20 +23,12 @@ const GameScreen = () => {
             <h1 className="pixel-header">Werewolf Tales</h1>
           </div>
           <p className="pixel-subheader">Moderation Suite</p>
-          <div className="mx-auto text-center mt-2 px-6 py-2 inline-block glass-card">
-            <span className="text-mystic-purple font-bold uppercase text-base tracking-widest">
-              Moderator View &bull; Phase: {gameState.phase} {gameState.dayCount > 0 && <span className="text-mystic-yellow ml-2">Day {gameState.dayCount}</span>}
-            </span>
-          </div>
         </header>
-        {/* Panels - more breathing room between columns */}
+        {/* Only GameSetup in lobby */}
         {gameState.phase === 'lobby' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-section">
-            <div className="pixel-panel animate-fade-in">
+          <div className="w-full flex justify-center">
+            <div className="pixel-panel animate-fade-in w-full max-w-[650px]">
               <GameSetup />
-            </div>
-            <div className="pixel-panel animate-fade-in">
-              <GameControls />
             </div>
           </div>
         ) : (
@@ -63,8 +54,6 @@ const GameScreen = () => {
           </div>
         )}
       </div>
-      {/* Faint fog layer, can be expanded for atmosphere */}
-      {/* <div className="fixed inset-0 z-0 pointer-events-none opacity-80" style={{background:'radial-gradient(ellipse at bottom, #23204099 0%, transparent 100%)'}}></div> */}
     </div>
   );
 };

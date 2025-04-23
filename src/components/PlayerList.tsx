@@ -7,25 +7,24 @@ import { Heart, Skull, User, Shield, Eye, FlaskConical, Crosshair } from 'lucide
 
 const PlayerList = () => {
   const { gameState, currentPlayer } = useGame();
-  
+
   const getRoleIcon = (role: PlayerRole, status: string) => {
-    if (status === 'dead') return <Skull className="h-5 w-5 text-werewolf-blood" />;
-    
+    if (status === 'dead') return <Skull className="h-4 w-4 text-werewolf-blood" />;
     switch (role) {
       case 'villager':
-        return <User className="h-5 w-5 text-werewolf-village" />;
+        return <User className="h-4 w-4 text-werewolf-village" />;
       case 'wolf':
-        return <Heart className="h-5 w-5 text-werewolf-blood" />;
+        return <Heart className="h-4 w-4 text-werewolf-blood" />;
       case 'seer':
-        return <Eye className="h-5 w-5 text-werewolf-accent" />;
+        return <Eye className="h-4 w-4 text-werewolf-accent" />;
       case 'witch':
-        return <FlaskConical className="h-5 w-5 text-werewolf-secondary" />;
+        return <FlaskConical className="h-4 w-4 text-werewolf-secondary" />;
       case 'hunter':
-        return <Crosshair className="h-5 w-5 text-werewolf-accent" />;
+        return <Crosshair className="h-4 w-4 text-werewolf-accent" />;
       case 'moderator':
-        return <Shield className="h-5 w-5 text-werewolf-primary" />;
+        return <Shield className="h-4 w-4 text-werewolf-primary" />;
       default:
-        return <User className="h-5 w-5" />;
+        return <User className="h-4 w-4" />;
     }
   };
 
@@ -35,44 +34,41 @@ const PlayerList = () => {
 
   const canSeeRole = (player: Player) => {
     if (!currentPlayer) return false;
-    
-    // If game is over, show all roles
     if (gameState.phase === 'gameOver') return true;
-    
-    // Player can see their own role
     if (currentPlayer.id === player.id) return true;
-    
-    // Moderator can see all roles
     if (currentPlayer.role === 'moderator') return true;
-    
-    // Wolves know each other
     if (currentPlayer.role === 'wolf' && player.role === 'wolf') return true;
-    
-    // Seer knows if someone is a wolf or not if they've checked them
     if (currentPlayer.role === 'seer' && gameState.nightActions.seerReveal === player.id) {
       return true;
     }
-    
     return false;
   };
 
   return (
-    <div className="border-medieval p-4 rounded-md">
-      <h2 className="werewolf-header text-xl mb-4">Players</h2>
-      <div className="grid grid-cols-1 gap-2">
+    <div className="border-medieval p-3 rounded-md">
+      <h2 className="werewolf-header text-base mb-2">Players</h2>
+      <div className="grid grid-cols-1 gap-1">
         {gameState.players.map((player) => (
           <div 
             key={player.id}
-            className={`flex items-center justify-between p-2 rounded-md ${player.status === 'dead' ? 'opacity-60' : ''} ${player.id === currentPlayer?.id ? 'border-medieval' : 'border border-werewolf-primary/30'}`}
+            className={`
+              flex items-center justify-between 
+              p-1 rounded 
+              ${player.status === 'dead' ? 'opacity-60' : ''} 
+              ${player.id === currentPlayer?.id ? 'border-medieval' : 'border border-werewolf-primary/20'}
+              bg-mystic-subtle/70
+              min-h-[32px] max-h-[38px]
+            `}
+            style={{ fontSize: '10.75px', lineHeight: 1.2 }}
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 max-w-[120px] sm:max-w-[150px] overflow-x-hidden whitespace-nowrap">
               {getRoleIcon(player.role, player.status)}
-              <span className="font-medieval">{getDisplayName(player)}</span>
+              <span className="truncate font-game">{getDisplayName(player)}</span>
               {player.isAI && (
-                <Badge variant="outline" className="text-xs">AI</Badge>
+                <Badge variant="outline" className="text-[9px] py-0 px-1">AI</Badge>
               )}
             </div>
-            <div>
+            <div className="flex items-center">
               {canSeeRole(player) ? (
                 <Badge className={`
                   ${player.role === 'wolf' ? 'bg-werewolf-blood' : ''} 
@@ -81,14 +77,15 @@ const PlayerList = () => {
                   ${player.role === 'witch' ? 'bg-werewolf-secondary' : ''} 
                   ${player.role === 'hunter' ? 'bg-werewolf-accent text-werewolf-darker' : ''} 
                   ${player.role === 'moderator' ? 'bg-werewolf-primary' : ''} 
+                  text-[10px] px-2 py-0
                 `}>
                   {player.role}
                 </Badge>
               ) : (
-                <Badge variant="outline">Unknown</Badge>
+                <Badge variant="outline" className="text-[10px] px-2 py-0">Unknown</Badge>
               )}
               {player.status === 'dead' && (
-                <Badge variant="destructive" className="ml-1">Dead</Badge>
+                <Badge variant="destructive" className="ml-1 text-[9px] px-2 py-0">Dead</Badge>
               )}
             </div>
           </div>
