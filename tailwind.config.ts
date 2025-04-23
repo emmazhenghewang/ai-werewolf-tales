@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -20,110 +19,42 @@ export default {
 		},
 		extend: {
 			colors: {
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
-				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
-				},
-				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
-				},
-				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
-				},
-				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
-				},
-				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
-				},
-				popover: {
-					DEFAULT: 'hsl(var(--popover))',
-					foreground: 'hsl(var(--popover-foreground))'
-				},
-				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
-				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				},
-				// Werewolf game theme colors
-				werewolf: {
-					dark: '#1E1525',
-					darker: '#0F0A12',
-					primary: '#583C87',
-					secondary: '#A28089',
-					accent: '#E09F3E',
-					blood: '#9A2B2B',
-					night: '#2E294E',
-					village: '#8B7E74',
-					parchment: '#F3EAD3'
-				}
+				// Balatro-modern vibrant palette!
+				'balatro-bg-dark': '#1A1F2C',
+				'balatro-purple': '#9b87f5',
+				'balatro-purple-secondary': '#7E69AB',
+				'balatro-purple-tertiary': '#6E59A5',
+				'balatro-glass': 'rgba(255,255,255,0.07)',
+				'balatro-glass-light': 'rgba(225,225,245,0.16)',
+				'balatro-orange': '#FFA99F',
+				'balatro-accent': '#D6BCFA',
+        // Accent gradients, foregrounds...
 			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+			backgroundImage: {
+				'balatro-radial': "radial-gradient(circle at 80% 20%, #D6BCFA 0%, #7E69AB 42%, #1A1F2C 100%)",
+				'balatro-card': "linear-gradient(135deg, #ece9f6cc 0%, #f0d6fc70 96%)",
+				'balatro-glass-dense': "linear-gradient(135deg, rgba(155,135,245,0.12) 0%, rgba(30,31,44,0.43) 100%)",
+				'balatro-btn': 'linear-gradient(90deg, #9b87f5 0%, #FFA99F 100%)',
 			},
-			keyframes: {
-				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
-				},
-				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
-				},
-				'fade-in': {
-					'0%': {
-						opacity: '0'
-					},
-					'100%': {
-						opacity: '1'
-					}
-				},
-				'pulse-subtle': {
-					'0%, 100%': {
-						opacity: '1'
-					},
-					'50%': {
-						opacity: '0.8'
-					}
-				}
-			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.5s ease-out',
-				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite'
+			boxShadow: {
+				'balatro': '0 8px 24px 0 rgba(144,85,255,0.12), 0 1.5px 7px 0 rgba(241,209,255,0.05)'
 			},
 			fontFamily: {
-				medieval: ['MedievalSharp', 'cursive'],
-				parchment: ['Uncial Antiqua', 'cursive']
+				'balatro': ['Playfair Display', 'serif'],
+				'medieval': ['MedievalSharp', 'cursive'],
+				'parchment': ['Uncial Antiqua', 'cursive'],
+			},
+			borderRadius: {
+				balatro: '1.5rem',
+			},
+			animation: {
+				'fade-in': 'fade-in 0.5s ease-out',
+			},
+			keyframes: {
+				'fade-in': {
+					'0%': { opacity: '0', transform: 'translateY(20px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
 			}
 		}
 	},

@@ -11,45 +11,61 @@ import GameSetup from '@/components/GameSetup';
 const GameScreen = () => {
   const { gameState } = useGame();
   const [nightMode, setNightMode] = useState(true);
-  
+
   // Update night mode based on game phase
   useEffect(() => {
     setNightMode(gameState.phase === 'night' || gameState.phase === 'lobby');
   }, [gameState.phase]);
 
+  // -- "Balatro" inspired layout --
   return (
-    <div className={`min-h-screen ${nightMode ? '' : 'day-mode'} transition-colors duration-1000`}>
-      <div className="container mx-auto p-4">
-        <header className="py-6 text-center mb-6">
-          <h1 className="text-4xl md:text-5xl font-parchment font-bold text-werewolf-accent mb-2">
+    <div
+      className={
+        "min-h-screen w-full pt-6 pb-12 px-2 bg-balatro-bg-dark bg-balatro-radial"
+      }
+    >
+      <div className="container mx-auto max-w-7xl">
+        <header className="mt-2 mb-8">
+          <h1 className="balatro-header text-center mb-3 animate-fade-in">
             Werewolf Tales
           </h1>
-          <p className="text-werewolf-secondary text-sm md:text-base italic mb-1">
-            A game of deception, deduction, and survival
+          <p className="balatro-subheader text-center">
+            Moderation Suite
           </p>
-          <div className="bg-werewolf-darker/50 rounded-md p-2 inline-block">
-            <p className="text-werewolf-accent text-xs md:text-sm font-bold">
-              MODERATOR VIEW - Phase: {gameState.phase} {gameState.dayCount > 0 && `- Day ${gameState.dayCount}`}
-            </p>
+          <div className="mx-auto text-center mt-2 px-4 inline-block balatro-card shadow-balatro">
+            <span className="text-balatro-purple-tertiary font-bold uppercase text-xs tracking-widest">
+              Moderator View &bull; Phase: {gameState.phase} {gameState.dayCount > 0 && `- Day ${gameState.dayCount}`}
+            </span>
           </div>
         </header>
-        
         {gameState.phase === 'lobby' ? (
           // Lobby view
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <GameSetup />
-            <GameControls />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="balatro-panel animate-fade-in">
+              <GameSetup />
+            </div>
+            <div className="balatro-panel animate-fade-in">
+              <GameControls />
+            </div>
           </div>
         ) : (
-          // Game view
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1 space-y-6">
-              <PlayerList />
-              <GameControls />
-              <VotingPanel />
+          // Main game panels
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-1 flex flex-col gap-6">
+              <div className="balatro-panel animate-fade-in">
+                <PlayerList />
+              </div>
+              <div className="balatro-panel animate-fade-in">
+                <GameControls />
+              </div>
+              <div className="balatro-panel animate-fade-in">
+                <VotingPanel />
+              </div>
             </div>
-            <div className="lg:col-span-3 h-[600px]">
-              <ChatBox />
+            <div className="lg:col-span-3">
+              <div className="balatro-panel h-[650px] animate-fade-in flex flex-col">
+                <ChatBox />
+              </div>
             </div>
           </div>
         )}

@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Uncial+Antiqua&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,129 +7,62 @@
 
 @layer base {
   :root {
-    --background: 250 15% 10%;
-    --foreground: 40 36% 95%;
-
-    --card: 257 26% 13%;
-    --card-foreground: 40 36% 95%;
-
-    --popover: 257 26% 13%;
-    --popover-foreground: 40 36% 95%;
-
-    --primary: 260 40% 38%;
-    --primary-foreground: 40 36% 95%;
-
-    --secondary: 350 20% 60%;
-    --secondary-foreground: 40 36% 95%;
-
-    --muted: 260 15% 25%;
-    --muted-foreground: 40 15% 70%;
-
-    --accent: 35 84% 56%;
-    --accent-foreground: 250 15% 10%;
-
-    --destructive: 0 65% 40%;
-    --destructive-foreground: 40 36% 95%;
-
-    --border: 260 15% 28%;
-    --input: 260 15% 28%;
-    --ring: 35 84% 56%;
-
-    --radius: 0.5rem;
+    --background: 245, 60%, 7%;
+    --foreground: 254, 70%, 96%;
   }
-
-  .day-mode {
-    --background: 40 36% 92%;
-    --foreground: 257 26% 13%;
-
-    --card: 40 30% 88%;
-    --card-foreground: 257 26% 13%;
-
-    --popover: 40 30% 88%;
-    --popover-foreground: 257 26% 13%;
-
-    --primary: 260 40% 38%;
-    --primary-foreground: 40 36% 95%;
-
-    --secondary: 350 20% 60%;
-    --secondary-foreground: 40 36% 95%;
-
-    --muted: 35 20% 75%;
-    --muted-foreground: 257 15% 25%;
-
-    --accent: 35 84% 56%;
-    --accent-foreground: 257 26% 13%;
-
-    --destructive: 0 65% 40%;
-    --destructive-foreground: 40 36% 95%;
-
-    --border: 35 20% 65%;
-    --input: 35 20% 65%;
-    --ring: 35 84% 56%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
+  
   body {
-    @apply bg-werewolf-dark text-werewolf-parchment font-medieval;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='%232e294e' fill-opacity='0.4'%3E%3Cpath d='M20 0C9 0 0 9 0 20s9 20 20 20 20-9 20-20S31 0 20 0zm0 37c-9.4 0-17-7.6-17-17S10.6 3 20 3s17 7.6 17 17-7.6 17-17 17z'/%3E%3C/g%3E%3C/svg%3E");
+    @apply bg-balatro-bg-dark text-balatro-accent font-balatro;
+    background: radial-gradient(ellipse 200% 180% at 80% 5%, #9b87f5 0%, #7E69AB 40%, #1A1F2C 100%);
+    min-height: 100vh;
+    /* Remove parchment artifacts for a modern look */
+  }
+  
+  .balatro-card {
+    @apply bg-balatro-glass-light backdrop-blur-lg border-2 border-balatro-purple-tertiary/50 rounded-balatro shadow-balatro p-4;
+    background-image: linear-gradient(135deg, #ece9f6cc 0%, #f0d6fc70 96%);
+  }
+  
+  .balatro-header {
+    @apply font-balatro font-extrabold text-5xl tracking-wider text-balatro-accent drop-shadow-lg;
+    background: linear-gradient(90deg, #9b87f5 0%, #FFA99F 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+  }
+  
+  .balatro-subheader {
+    @apply font-balatro font-medium text-lg text-balatro-orange;
+  }
+  
+  .balatro-btn {
+    @apply rounded-lg font-bold text-white px-8 py-3 shadow-balatro border-0;
+    background: linear-gradient(90deg, #9b87f5 0%, #FFA99F 100%);
+    transition: transform 0.12s;
+  }
+  .balatro-btn:active {
+    transform: scale(0.98);
+  }
+  
+  .balatro-panel {
+    @apply balatro-card;
   }
 }
 
 @layer components {
-  .werewolf-header {
-    @apply font-parchment text-werewolf-accent font-bold uppercase tracking-wide;
-  }
-  
-  .chat-bubble {
-    @apply p-3 rounded-lg max-w-xs lg:max-w-md;
-  }
-  
-  .village-chat {
-    @apply chat-bubble bg-werewolf-village text-werewolf-darker;
-  }
-  
-  .wolf-chat {
-    @apply chat-bubble bg-werewolf-blood text-werewolf-parchment;
-  }
-  
-  .moderator-chat {
-    @apply chat-bubble bg-werewolf-night text-werewolf-accent font-bold;
-  }
-  
-  .system-chat {
-    @apply chat-bubble bg-werewolf-primary text-werewolf-parchment italic;
-  }
-  
-  .parchment-bg {
-    @apply bg-werewolf-parchment text-werewolf-darker rounded-md shadow-md;
-  }
-  
-  .medieval-button {
-    @apply px-4 py-2 rounded-md font-bold transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-  
   .primary-button {
-    @apply medieval-button bg-werewolf-primary text-werewolf-parchment hover:bg-werewolf-primary/80;
+    @apply balatro-btn;
   }
-  
-  .secondary-button {
-    @apply medieval-button bg-werewolf-secondary text-werewolf-darker hover:bg-werewolf-secondary/80;
-  }
-  
   .accent-button {
-    @apply medieval-button bg-werewolf-accent text-werewolf-darker hover:bg-werewolf-accent/80;
+    @apply balatro-btn border-0;
+    background: linear-gradient(90deg, #FFA99F 0%, #9b87f5 100%);
   }
-  
   .danger-button {
-    @apply medieval-button bg-werewolf-blood text-werewolf-parchment hover:bg-werewolf-blood/80;
+    @apply balatro-btn bg-gradient-to-r from-red-400 to-balatro-purple border-0;
   }
-  
   .border-medieval {
-    @apply border-2 border-werewolf-accent/50 rounded-md shadow-md;
+    @apply border-balatro-purple-secondary shadow-balatro;
   }
 }
+
