@@ -1,68 +1,62 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Stardew-pixel dark base styles */
 @layer base {
   :root {
-    --background: 245, 60%, 7%;
-    --foreground: 254, 70%, 96%;
+    --background: 230, 10%, 11%;
+    --foreground: 222, 12%, 95%;
   }
-  
+
   body {
-    @apply bg-balatro-bg-dark text-balatro-accent font-balatro;
-    background: radial-gradient(ellipse 200% 180% at 80% 5%, #9b87f5 0%, #7E69AB 40%, #1A1F2C 100%);
+    @apply bg-stardew-bg text-stardew-accent font-pixel;
+    background-color: #221F26;
+    /* pixel noise bg could be added here */
     min-height: 100vh;
-    /* Remove parchment artifacts for a modern look */
+    letter-spacing: 0.02em;
   }
-  
-  .balatro-card {
-    @apply bg-balatro-glass-light backdrop-blur-lg border-2 border-balatro-purple-tertiary/50 rounded-balatro shadow-balatro p-4;
-    background-image: linear-gradient(135deg, #ece9f6cc 0%, #f0d6fc70 96%);
+
+  /* Pixel panel/card style */
+  .pixel-card, .pixel-panel {
+    @apply bg-stardew-panel border-4 border-stardew-border-lite rounded-pixel shadow-pixel p-4;
   }
-  
-  .balatro-header {
-    @apply font-balatro font-extrabold text-5xl tracking-wider text-balatro-accent drop-shadow-lg;
-    background: linear-gradient(90deg, #9b87f5 0%, #FFA99F 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-fill-color: transparent;
+
+  .pixel-header {
+    @apply font-pixel text-3xl md:text-4xl text-stardew-yellow drop-shadow text-center mb-2;
+    letter-spacing: 0.03em;
   }
-  
-  .balatro-subheader {
-    @apply font-balatro font-medium text-lg text-balatro-orange;
+
+  .pixel-subheader {
+    @apply font-pixel text-lg text-stardew-peach mt-2 text-center;
   }
-  
-  .balatro-btn {
-    @apply rounded-lg font-bold text-white px-8 py-3 shadow-balatro border-0;
-    background: linear-gradient(90deg, #9b87f5 0%, #FFA99F 100%);
-    transition: transform 0.12s;
+
+  .pixel-btn, .primary-button {
+    @apply inline-block rounded-pixel font-pixel text-stardew-bg font-bold px-6 py-2 bg-stardew-yellow border-4 border-stardew-border-lite shadow-pixel transition transform active:scale-95;
+    letter-spacing: 0.01em;
   }
-  .balatro-btn:active {
-    transform: scale(0.98);
+  .pixel-btn:active {
+    @apply bg-stardew-orange border-stardew-orange;
   }
-  
-  .balatro-panel {
-    @apply balatro-card;
+
+  .pixel-panel {
+    @apply mb-3;
+  }
+
+  .border-pixel {
+    @apply border-4 border-stardew-border-dark;
   }
 }
 
+/* Small tag/button secondary style */
 @layer components {
-  .primary-button {
-    @apply balatro-btn;
-  }
   .accent-button {
-    @apply balatro-btn border-0;
-    background: linear-gradient(90deg, #FFA99F 0%, #9b87f5 100%);
+    @apply pixel-btn bg-stardew-orange text-stardew-bg border-stardew-purple;
   }
   .danger-button {
-    @apply balatro-btn bg-gradient-to-r from-red-400 to-balatro-purple border-0;
-  }
-  .border-medieval {
-    @apply border-balatro-purple-secondary shadow-balatro;
+    @apply pixel-btn bg-red-600 text-stardew-white border-stardew-border-dark;
   }
 }
-
