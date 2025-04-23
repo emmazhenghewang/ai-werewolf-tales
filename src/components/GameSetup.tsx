@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Player, PlayerRole } from '@/types/game';
@@ -22,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Check, Plus, Trash2, User, UserPlus, Play } from 'lucide-react';
+import { Check, Plus, Trash2, User, UserPlus, Play, Wand2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -105,10 +104,8 @@ const GameSetup = () => {
   };
   
   const autoFillWithAIPlayers = () => {
-    // Create a list of available roles we need
     const roles: PlayerRole[] = [];
     
-    // Add required roles based on what's missing
     if (roleCounts.moderator < 1) roles.push('moderator');
     if (roleCounts.wolf < 3) {
       for (let i = roleCounts.wolf; i < 3; i++) roles.push('wolf');
@@ -117,30 +114,24 @@ const GameSetup = () => {
     if (roleCounts.witch < 1) roles.push('witch');
     if (roleCounts.hunter < 1) roles.push('hunter');
     
-    // Fill remaining slots with villagers
     const remainingSlots = 10 - gameState.players.length - roles.length;
     for (let i = 0; i < remainingSlots && roleCounts.villager < 3; i++) {
       roles.push('villager');
     }
     
-    // Shuffle the roles for random assignment
     const shuffledRoles = [...roles].sort(() => Math.random() - 0.5);
     
-    // List of AI names
     const aiNames = [
       "AI_Olivia", "AI_Noah", "AI_Emma", "AI_Liam", 
       "AI_Ava", "AI_William", "AI_Sophia", "AI_James", 
       "AI_Isabella", "AI_Benjamin", "AI_Mia", "AI_Lucas"
     ];
     
-    // Create AI players with roles
     let playersAdded = 0;
     
     shuffledRoles.forEach((role, index) => {
-      // Generate unique name
       const name = `${aiNames[index % aiNames.length]}${Math.floor(Math.random() * 100)}`;
       
-      // Create a new player with generated ID
       const newPlayer = {
         id: uuidv4(),
         name,
@@ -149,7 +140,6 @@ const GameSetup = () => {
         isAI: true
       };
       
-      // Add the player using the addPlayer function from context
       addPlayer(name, true, role);
       
       playersAdded++;
@@ -169,57 +159,49 @@ const GameSetup = () => {
   };
 
   return (
-    <div className="border-medieval p-4 rounded-md">
-      <h2 className="werewolf-header text-xl mb-4">Game Setup</h2>
+    <div className="border-medieval p-4 rounded-md space-y-4">
+      <h2 className="text-lg font-bold mb-3">Game Setup</h2>
       
-      <div className="mb-6">
-        <div className="grid grid-cols-3 gap-2 mb-2">
-          <div className="p-2 border border-werewolf-primary/30 rounded-md text-center">
-            <div className="text-xs text-werewolf-secondary">Villagers</div>
-            <div className={`text-lg ${roleCounts.villager < 3 ? 'text-werewolf-blood' : 'text-werewolf-accent'}`}>{roleCounts.villager}/3</div>
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        {[
+          { label: 'Villagers', count: roleCounts.villager, required: 3 },
+          { label: 'Wolves', count: roleCounts.wolf, required: 3 },
+          { label: 'Seer', count: roleCounts.seer, required: 1 },
+          { label: 'Witch', count: roleCounts.witch, required: 1 },
+          { label: 'Hunter', count: roleCounts.hunter, required: 1 },
+          { label: 'Moderator', count: roleCounts.moderator, required: 1 },
+        ].map(({ label, count, required }) => (
+          <div 
+            key={label} 
+            className="p-1.5 border border-werewolf-primary/30 rounded-md text-center"
+          >
+            <div className="text-xs text-werewolf-secondary">{label}</div>
+            <div className={`text-sm ${count < required ? 'text-werewolf-blood' : 'text-werewolf-accent'}`}>
+              {count}/{required}
+            </div>
           </div>
-          <div className="p-2 border border-werewolf-primary/30 rounded-md text-center">
-            <div className="text-xs text-werewolf-secondary">Wolves</div>
-            <div className={`text-lg ${roleCounts.wolf < 3 ? 'text-werewolf-blood' : 'text-werewolf-accent'}`}>{roleCounts.wolf}/3</div>
-          </div>
-          <div className="p-2 border border-werewolf-primary/30 rounded-md text-center">
-            <div className="text-xs text-werewolf-secondary">Seer</div>
-            <div className={`text-lg ${roleCounts.seer !== 1 ? 'text-werewolf-blood' : 'text-werewolf-accent'}`}>{roleCounts.seer}/1</div>
-          </div>
-          <div className="p-2 border border-werewolf-primary/30 rounded-md text-center">
-            <div className="text-xs text-werewolf-secondary">Witch</div>
-            <div className={`text-lg ${roleCounts.witch !== 1 ? 'text-werewolf-blood' : 'text-werewolf-accent'}`}>{roleCounts.witch}/1</div>
-          </div>
-          <div className="p-2 border border-werewolf-primary/30 rounded-md text-center">
-            <div className="text-xs text-werewolf-secondary">Hunter</div>
-            <div className={`text-lg ${roleCounts.hunter !== 1 ? 'text-werewolf-blood' : 'text-werewolf-accent'}`}>{roleCounts.hunter}/1</div>
-          </div>
-          <div className="p-2 border border-werewolf-primary/30 rounded-md text-center">
-            <div className="text-xs text-werewolf-secondary">Moderator</div>
-            <div className={`text-lg ${roleCounts.moderator !== 1 ? 'text-werewolf-blood' : 'text-werewolf-accent'}`}>{roleCounts.moderator}/1</div>
-          </div>
-        </div>
-        
-        {playersNeeded > 0 && (
-          <div className="text-sm text-werewolf-secondary">
-            {playersNeeded} more players needed (9 players + 1 moderator)
-          </div>
-        )}
-        
-        {!hasRequiredRoles && gameState.players.length >= 10 && (
-          <div className="text-sm text-werewolf-blood mt-2">
-            Required roles not fulfilled. Please adjust player roles.
-          </div>
-        )}
+        ))}
       </div>
       
-      <div className="mb-4 flex gap-2">
+      {playersNeeded > 0 && (
+        <div className="text-xs text-werewolf-secondary">
+          {playersNeeded} more players needed (9 players + 1 moderator)
+        </div>
+      )}
+      
+      {!hasRequiredRoles && gameState.players.length >= 10 && (
+        <div className="text-xs text-werewolf-blood mt-2">
+          Required roles not fulfilled. Please adjust player roles.
+        </div>
+      )}
+      
+      <div className="flex gap-2 items-center">
         <div className="flex-grow">
           <Input
             placeholder="Player name"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            className="bg-werewolf-darker border-werewolf-primary/50 text-werewolf-parchment"
+            className="bg-werewolf-darker border-werewolf-primary/50 text-werewolf-parchment text-sm"
           />
         </div>
         <div className="flex items-center space-x-2">
@@ -228,21 +210,25 @@ const GameSetup = () => {
             checked={isAI}
             onCheckedChange={setIsAI}
           />
-          <Label htmlFor="ai-player">AI</Label>
+          <Label htmlFor="ai-player" className="text-xs">AI</Label>
         </div>
-        <Button className="primary-button" onClick={handleAddPlayer} disabled={!playerName.trim()}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button 
+          className="primary-button py-1 px-3 text-xs" 
+          onClick={handleAddPlayer} 
+          disabled={!playerName.trim()}
+        >
+          <Plus className="h-3 w-3 mr-1" />
           Add
         </Button>
       </div>
       
-      <Separator className="my-4 bg-werewolf-primary/30" />
+      <Separator className="my-3 bg-werewolf-primary/30" />
       
       <div className="space-y-2">
-        <h3 className="font-bold text-werewolf-accent">Players</h3>
+        <h3 className="font-bold text-werewolf-accent text-sm">Players</h3>
         
         {gameState.players.length === 0 && (
-          <div className="text-center text-werewolf-secondary py-4">
+          <div className="text-center text-werewolf-secondary text-xs py-2">
             No players added yet
           </div>
         )}
@@ -337,24 +323,22 @@ const GameSetup = () => {
         ))}
       </div>
       
-      {/* ----- AUTO FILL AI FEATURE RESTORED HERE ----- */}
       <div className="mt-4 flex">
         <Button
-          className="w-full bg-werewolf-primary text-werewolf-parchment hover:bg-werewolf-primary/80"
+          className="w-full bg-werewolf-primary text-werewolf-parchment hover:bg-werewolf-primary/80 text-sm"
           onClick={autoFillWithAIPlayers}
           disabled={gameState.players.length >= 10}
           type="button"
         >
-          <UserPlus className="h-4 w-4 mr-2" />
+          <Wand2 className="h-4 w-4 mr-2" />
           Autofill with AI
         </Button>
       </div>
-      {/* ----- END AUTO FILL AI FEATURE ----- */}
       
-      <div className="mt-6 space-y-4">
+      <div className="mt-4 space-y-4">
         {hasRequiredRoles && (
           <Button 
-            className="accent-button w-full" 
+            className="accent-button w-full text-sm" 
             onClick={startGame}
           >
             <Play className="h-4 w-4 mr-2" />
@@ -367,4 +351,3 @@ const GameSetup = () => {
 };
 
 export default GameSetup;
-
