@@ -59,9 +59,9 @@ const PlayerList = () => {
               bg-mystic-subtle/70
               min-h-[32px] max-h-[38px]
             `}
-            style={{ fontSize: '10.75px', lineHeight: 1.2 }}
+            style={{ fontSize: 'clamp(10px, 2vw, 13px)', lineHeight: 1.2 }}
           >
-            <div className="flex items-center space-x-1 max-w-[120px] sm:max-w-[150px] overflow-x-hidden whitespace-nowrap">
+            <div className="flex items-center space-x-1 max-w-[90px] xs:max-w-[120px] sm:max-w-[160px] overflow-x-hidden whitespace-nowrap">
               {getRoleIcon(player.role, player.status)}
               <span className="truncate font-game">{getDisplayName(player)}</span>
               {player.isAI && (
