@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/button';
@@ -12,27 +11,23 @@ const ChatBox = () => {
   const [messageText, setMessageText] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Determine if current player can chat based on game phase and role
   const canChat = () => {
     if (!currentPlayer) return false;
     if (currentPlayer.status === 'dead') return false;
     if (gameState.phase === 'gameOver') return true;
     if (currentPlayer.role === 'moderator') return true;
     
-    // During day and voting, only the speaking player or everyone during voting can chat
     if (gameState.phase === 'day') {
       return gameState.speakingPlayerId === currentPlayer.id;
     }
     
     if (gameState.phase === 'voting') return true;
     
-    // During night, only wolves can chat in wolf chat
     if (gameState.phase === 'night' && (currentPlayer.role === 'wolf' || currentPlayer.role === 'wolfKing')) return true;
     
     return false;
   };
 
-  // Determine appropriate message type based on current phase and player role
   const getMessageType = (): ChatMessageType => {
     if (!currentPlayer) return 'village';
     
@@ -42,38 +37,31 @@ const ChatBox = () => {
     return 'village';
   };
 
-  // Get all messages from both channels for the moderator view
   const getVisibleMessages = () => {
     const messages = [];
     
-    // Show all moderator messages
     const moderatorMessages = [...gameState.messages.village, ...gameState.messages.wolf]
       .filter(m => m.type === 'moderator');
     messages.push(...moderatorMessages);
     
-    // Show all system messages
     const systemMessages = [...gameState.messages.village, ...gameState.messages.wolf]
       .filter(m => m.type === 'system');
     messages.push(...systemMessages);
     
-    // Show all village messages
     const villageMessages = gameState.messages.village.filter(m => 
       m.type === 'village' && m.timestamp <= Date.now()
     );
     messages.push(...villageMessages);
     
-    // Show all wolf messages 
     const wolfMessages = gameState.messages.wolf.filter(m => 
       m.type === 'wolf' && m.timestamp <= Date.now()
     );
     messages.push(...wolfMessages);
     
-    // Sort all messages by timestamp
     return messages.sort((a, b) => a.timestamp - b.timestamp);
   };
 
   useEffect(() => {
-    // Scroll to bottom on new messages
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [gameState.messages]);
 
@@ -90,6 +78,9 @@ const ChatBox = () => {
   };
 
   const renderChatBubble = (message: any, index: number) => {
+    const sender = gameState.players.find(p => p.id === message.senderId);
+    const roleInfo = sender ? ` (${sender.role})` : "";
+
     const isCurrentUser = message.senderId === currentPlayer?.id;
     
     let bubbleClassName = 'chat-bubble mb-2 p-3 rounded-lg max-w-[80%] ';
@@ -106,10 +97,6 @@ const ChatBox = () => {
     
     bubbleClassName += isCurrentUser ? 'ml-auto' : '';
 
-    // Get player role for moderator view
-    const sender = gameState.players.find(p => p.id === message.senderId);
-    const roleInfo = sender ? ` (${sender.role})` : '';
-    
     return (
       <div key={message.id || index} className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} mb-4`}>
         <div className="text-xs text-werewolf-secondary mb-1">

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Player, PlayerRole } from '@/types/game';
@@ -338,14 +337,6 @@ const GameSetup = () => {
       </div>
       
       <div className="mt-6 space-y-4">
-        <Button 
-          className="accent-button w-full"
-          onClick={autoFillWithAIPlayers}
-        >
-          <UserPlus className="h-4 w-4 mr-2" />
-          Auto-fill with AI Players
-        </Button>
-        
         {hasRequiredRoles && (
           <Button 
             className="accent-button w-full" 
@@ -355,25 +346,6 @@ const GameSetup = () => {
             Start Game
           </Button>
         )}
-        
-        <div className="relative">
-          <Separator className="my-4 bg-werewolf-primary/30" />
-          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-werewolf-darker px-4 text-xs text-werewolf-secondary">
-            OR
-          </div>
-        </div>
-        
-        <Button 
-          className="secondary-button w-full" 
-          onClick={simulateFullGame}
-          variant="outline"
-        >
-          <Film className="h-4 w-4 mr-2" />
-          Watch Full Game Simulation
-        </Button>
-        <div className="text-xs text-werewolf-secondary text-center">
-          This will run an automated game with 4 nights using AI players so you can see how the game works
-        </div>
       </div>
     </div>
   );
