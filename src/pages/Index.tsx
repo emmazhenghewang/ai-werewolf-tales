@@ -22,7 +22,7 @@ const GameScreen = () => {
           <div className="mb-1 mt-10">
             <h1 className="pixel-header">Werewolf Tales</h1>
           </div>
-          <p className="pixel-subheader">Moderation Suite</p>
+          <p className="pixel-subheader">Game Status</p>
         </header>
         {/* Only GameSetup in lobby */}
         {gameState.phase === 'lobby' ? (
