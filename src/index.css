@@ -76,7 +76,7 @@
 
   /* Mystic CTA button for autofill, big and clear */
   .mystic-cta {
-    @apply inline-flex items-center justify-center w-full border-4 border-mystic-yellow rounded-xl bg-mystic-yellow text-mystic-bg font-bold py-3 px-6 shadow-game transition-transform duration-100 hover:bg-mystic-yellow/90 text-xs;
+    @apply inline-flex items-center justify-center w-full border-4 border-mystic-yellow rounded-xl bg-mystic-yellow text-mystic-bg font-bold py-2 px-6 shadow-game transition-transform duration-100 hover:bg-mystic-yellow/90 text-xs;
     font-family: 'Press Start 2P', monospace;
     letter-spacing: 0.02em;
     margin-top: 8px;

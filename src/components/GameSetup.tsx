@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Player, PlayerRole } from '@/types/game';
@@ -159,7 +160,7 @@ const GameSetup = () => {
   };
 
   return (
-    <div className="border-medieval p-4 rounded-md space-y-4">
+    <div className="border-medieval p-4 rounded-md space-y-4 max-w-full overflow-hidden">
       <h2 className="font-game text-base font-bold mb-3 setup-role-box">Game Setup</h2>
       
       <div className="grid grid-cols-3 gap-2 mb-2">
@@ -195,25 +196,25 @@ const GameSetup = () => {
         </div>
       )}
       
-      <div className="flex gap-2 items-center mb-2">
-        <div className="flex-grow">
+      <div className="flex flex-wrap gap-2 items-center mb-2 w-full">
+        <div className="flex-grow min-w-0">
           <input
             placeholder="Player name"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            className="pixel-input h-8 text-xs"
+            className="pixel-input h-8 text-xs w-full"
           />
         </div>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 flex-shrink-0">
           <Switch 
             id="ai-player" 
             checked={isAI}
             onCheckedChange={setIsAI}
           />
-          <Label htmlFor="ai-player" className="game-setup-label">AI</Label>
+          <Label htmlFor="ai-player" className="game-setup-label whitespace-nowrap">AI</Label>
         </div>
         <Button 
-          className="primary-button py-1 px-3 text-xs" 
+          className="primary-button py-1 px-3 text-xs flex-shrink-0" 
           onClick={handleAddPlayer} 
           disabled={!playerName.trim()}
         >
@@ -224,7 +225,7 @@ const GameSetup = () => {
       
       <Separator className="my-[8px] bg-mystic-purple/30" />
       
-      <div className="space-y-2">
+      <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
         <h3 className="font-extrabold text-mystic-blue text-xs mb-1 game-setup-label">Players</h3>
         
         {gameState.players.length === 0 && (
@@ -236,20 +237,20 @@ const GameSetup = () => {
         {gameState.players.map((player) => (
           <div 
             key={player.id} 
-            className="flex items-center justify-between p-1 border border-mystic-purple/30 rounded-md bg-mystic-subtle setup-role-box"
+            className="flex items-center justify-between p-1 border border-mystic-purple/30 rounded-md bg-mystic-subtle setup-role-box max-w-full"
           >
-            <div className="flex items-center game-setup-player">
-              <User className="mr-1 text-[13px] text-mystic-muted h-4 w-4" />
-              <span>{player.name}</span>
+            <div className="flex items-center game-setup-player truncate max-w-[120px]">
+              <User className="mr-1 flex-shrink-0 text-[13px] text-mystic-muted h-4 w-4" />
+              <span className="truncate">{player.name}</span>
               {player.isAI && (
-                <span className="ml-1 text-[10px] text-mystic-muted">(AI)</span>
+                <span className="ml-1 text-[10px] text-mystic-muted whitespace-nowrap">(AI)</span>
               )}
               {player.id === currentPlayer?.id && (
-                <span className="ml-1 text-[10px] text-mystic-blue">(You)</span>
+                <span className="ml-1 text-[10px] text-mystic-blue whitespace-nowrap">(You)</span>
               )}
             </div>
             
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1 flex-shrink-0">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button 
@@ -333,6 +334,7 @@ const GameSetup = () => {
           disabled={gameState.players.length >= 10}
           type="button"
         >
+          <Wand2 className="mr-2 h-4 w-4" />
           Autofill with AI
         </button>
       </div>
