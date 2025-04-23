@@ -1,62 +1,88 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Playfair+Display:wght@700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Stardew-pixel dark base styles */
+/* Set up dark mysterious, pixel style */
 @layer base {
   :root {
-    --background: 230, 10%, 11%;
-    --foreground: 222, 12%, 95%;
+    --background: 230, 10%, 9%;
+    --foreground: 230, 13%, 97%;
   }
 
   body {
-    @apply bg-stardew-bg text-stardew-accent font-pixel;
-    background-color: #221F26;
-    /* pixel noise bg could be added here */
-    min-height: 100vh;
+    @apply bg-mystic-bg text-mystic-accent font-game min-h-screen;
+    background-image: linear-gradient(120deg, #181828 0%, #232045 100%), var(--mystic-noise);
     letter-spacing: 0.02em;
+    font-family: 'Press Start 2P', monospace;
+    /* overlay noise for atmosphere */
+    background-blend-mode: overlay;
+    margin: 0;
   }
 
-  /* Pixel panel/card style */
+  /* Main pixel panel/card style */
   .pixel-card, .pixel-panel {
-    @apply bg-stardew-panel border-4 border-stardew-border-lite rounded-pixel shadow-pixel p-4;
+    @apply bg-mystic-panel/95 border-4 border-mystic-border rounded-xl shadow-game p-panel;
+    backdrop-filter: blur(2px);
+    background-blend-mode: lighten;
   }
 
   .pixel-header {
-    @apply font-pixel text-3xl md:text-4xl text-stardew-yellow drop-shadow text-center mb-2;
+    @apply font-display text-5xl md:text-[3.5rem] text-mystic-yellow drop-shadow text-center mb-3;
     letter-spacing: 0.03em;
+    line-height: 1.08;
   }
 
   .pixel-subheader {
-    @apply font-pixel text-lg text-stardew-peach mt-2 text-center;
+    @apply font-display text-2xl md:text-2xl text-mystic-blue mt-2 text-center font-thin;
+    letter-spacing: 0.01em;
   }
 
+  /* Panel spacing and border */
+  .pixel-panel {
+    @apply mb-section mt-section p-panel;
+    background-color: rgba(34,31,43,0.88);
+  }
+
+  /* Glass card effect for chat/messages etc */
+  .glass-card {
+    @apply bg-mystic-card/80 border border-mystic-border shadow-game rounded-xl;
+    backdrop-filter: blur(3.5px);
+    background-blend-mode: lighten;
+  }
+
+  /* Buttons */
   .pixel-btn, .primary-button {
-    @apply inline-block rounded-pixel font-pixel text-stardew-bg font-bold px-6 py-2 bg-stardew-yellow border-4 border-stardew-border-lite shadow-pixel transition transform active:scale-95;
+    @apply inline-block rounded-xl font-game text-mystic-bg font-bold px-7 py-3 bg-mystic-yellow border-4 border-mystic-border shadow-game transition-transform transform-gpu active:scale-95;
     letter-spacing: 0.01em;
   }
   .pixel-btn:active {
-    @apply bg-stardew-orange border-stardew-orange;
+    @apply bg-mystic-purple border-mystic-yellow;
   }
-
-  .pixel-panel {
-    @apply mb-3;
-  }
-
-  .border-pixel {
-    @apply border-4 border-stardew-border-dark;
-  }
-}
-
-/* Small tag/button secondary style */
-@layer components {
   .accent-button {
-    @apply pixel-btn bg-stardew-orange text-stardew-bg border-stardew-purple;
+    @apply pixel-btn bg-mystic-blue text-mystic-bg border-mystic-purple;
   }
   .danger-button {
-    @apply pixel-btn bg-red-600 text-stardew-white border-stardew-border-dark;
+    @apply pixel-btn bg-mystic-danger text-mystic-accent border-mystic-border;
+  }
+  .secondary-button {
+    @apply pixel-btn bg-mystic-muted text-mystic-accent border-mystic-border;
+  }
+
+  /* Pixel pixel look for all input and controls */
+  .pixel-input {
+    @apply bg-mystic-subtle border-2 border-mystic-purple text-mystic-accent rounded-pixel px-4 py-3 font-game focus:outline-none focus:ring-2 focus:ring-mystic-yellow;
+  }
+  .border-pixel {
+    @apply border-4 border-mystic-border;
   }
 }
+
+@layer components {
+  .glass {
+    @apply bg-mystic-glass backdrop-blur-lg border border-mystic-border rounded-xl;
+  }
+}
+
