@@ -337,6 +337,20 @@ const GameSetup = () => {
         ))}
       </div>
       
+      {/* ----- AUTO FILL AI FEATURE RESTORED HERE ----- */}
+      <div className="mt-4 flex">
+        <Button
+          className="w-full bg-werewolf-primary text-werewolf-parchment hover:bg-werewolf-primary/80"
+          onClick={autoFillWithAIPlayers}
+          disabled={gameState.players.length >= 10}
+          type="button"
+        >
+          <UserPlus className="h-4 w-4 mr-2" />
+          Autofill with AI
+        </Button>
+      </div>
+      {/* ----- END AUTO FILL AI FEATURE ----- */}
+      
       <div className="mt-6 space-y-4">
         {hasRequiredRoles && (
           <Button 
@@ -353,3 +367,4 @@ const GameSetup = () => {
 };
 
 export default GameSetup;
+
