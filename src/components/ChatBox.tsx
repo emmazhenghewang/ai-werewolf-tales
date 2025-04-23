@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/button';
@@ -139,10 +140,10 @@ const ChatBox = () => {
 
   return (
     <div className="border-medieval rounded-md overflow-hidden flex flex-col h-full">
-      <div className="p-2 bg-werewolf-darker border-b border-werewolf-primary/30 flex justify-between items-center">
+      <div className="p-3 bg-werewolf-darker border-b border-werewolf-primary/30 flex justify-between items-center">
         <div className="flex items-center">
           <MessageSquare className="h-4 w-4 mr-2 text-werewolf-accent" />
-          <span className="text-werewolf-accent font-bold">
+          <span className="text-werewolf-accent font-bold text-sm">
             {getChatTitle()}
           </span>
         </div>
@@ -153,19 +154,43 @@ const ChatBox = () => {
       </div>
 
       <ScrollArea className="flex-grow p-4">
-        <div className="space-y-1">
+        <div className="space-y-2">
           {visibleMessages.length === 0 ? (
-            <div className="text-center text-werewolf-secondary py-8">
+            <div className="text-center text-werewolf-secondary py-8 text-sm">
               No messages yet. Start the game to see activity.
             </div>
           ) : (
-            visibleMessages.map((message, index) => renderChatBubble(message, index))
+            visibleMessages.map((message, index) => (
+              <div key={message.id || index} className={`flex flex-col ${message.senderId === currentPlayer?.id ? 'items-end' : 'items-start'} mb-3`}>
+                <div className="text-[11px] text-werewolf-secondary mb-1">
+                  {message.type !== 'system' && (
+                    <>
+                      <span className={message.type === 'wolf' ? 'text-werewolf-blood' : ''}>
+                        {message.senderName}{roleInfo} - {formatTimestamp(message.timestamp)}
+                      </span>
+                      {message.type === 'wolf' && <span className="ml-2 text-werewolf-blood">[Wolf Chat]</span>}
+                    </>
+                  )}
+                </div>
+                <div className={`chat-bubble mb-1 p-2.5 rounded-lg max-w-[85%] text-sm leading-relaxed ${
+                  message.type === 'wolf' 
+                    ? 'bg-werewolf-blood/30 text-werewolf-parchment' 
+                    : message.type === 'moderator'
+                    ? 'bg-werewolf-accent/30 text-werewolf-parchment'
+                    : message.type === 'system'
+                    ? 'bg-werewolf-secondary/30 text-werewolf-parchment italic'
+                    : 'bg-werewolf-primary/30 text-werewolf-parchment'
+                }`}>
+                  {message.content}
+                </div>
+              </div>
+            ))
           )}
           <div ref={chatEndRef} />
         </div>
       </ScrollArea>
 
-      <form onSubmit={handleSendMessage} className="p-2 border-t border-werewolf-primary/30 bg-werewolf-darker">
+      <form onSubmit={handleSendMessage} className="p-3 border-t border-werewolf-primary/30 bg-werewolf-darker">
         <div className="flex space-x-2">
           <Input
             type="text"
@@ -173,13 +198,14 @@ const ChatBox = () => {
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
             disabled={!canChat()}
-            className="bg-werewolf-darker border-werewolf-primary/50 text-werewolf-parchment"
+            className="bg-werewolf-darker border-werewolf-primary/50 text-werewolf-parchment text-sm"
           />
           <Button 
             type="submit" 
             disabled={!canChat() || !messageText.trim()} 
             variant="secondary"
             size="icon"
+            className="shrink-0"
           >
             <Send className="h-4 w-4" />
           </Button>
